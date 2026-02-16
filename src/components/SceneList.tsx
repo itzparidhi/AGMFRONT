@@ -548,8 +548,8 @@ export const SceneList: React.FC<SceneListProps> = ({ projectId, episodeId }) =>
       async () => {
         try {
           await softDeleteScene(sceneId);
-          // Optimistic update
-          setScenes(prev => prev.filter(s => s.id !== sceneId));
+          // Refresh list to update sequence names (e.g. Scene 3 -> Scene 2)
+          await fetchScenes();
         } catch (err: any) {
           console.error("Failed to delete scene:", err);
           dialog.alert("Error", err.response?.data?.detail || "Failed to delete scene", 'danger');

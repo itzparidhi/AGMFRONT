@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { CompletionStatusModal } from '../components/CompletionStatusModal';
 import { ViewSelector } from '../components/ViewSelector';
 import { createStructure, restoreShot } from '../api';
-import { Trash2, RotateCcw, X } from 'lucide-react';
+import { Trash2, RotateCcw, X, ArrowLeft } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 // import type { Shot } from '../types';
 
@@ -185,7 +185,13 @@ export const Timeline: React.FC = () => {
       <div className="w-3/4 flex flex-col border-r border-zinc-700">
         <div className="p-4 border-b border-zinc-700 flex justify-between items-center">
           <div className="flex items-center space-x-4">
-            <button onClick={() => navigate(`/project/${project.id}`)} className="text-zinc-400 hover:text-white">← Back</button>
+            <button 
+              onClick={() => navigate(`/project/${project.id}`)} 
+              className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors"
+            >
+              <ArrowLeft size={20} /> 
+              Back
+            </button>
             <h1 className="text-2xl font-bold">{episodeName || project.name}</h1>
           </div>
 

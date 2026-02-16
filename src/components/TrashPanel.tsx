@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
 import type {  } from '../types';
-import { Trash2, RotateCcw, Clock, Folder, Film, Image } from 'lucide-react';
-import { restoreProject, restoreScene, restoreShot } from '../api';
+import { Trash2, RotateCcw, Clock, Folder, Film, Image, Clapperboard } from 'lucide-react';
+import { restoreProject, restoreScene, restoreShot, restoreEpisode } from '../api';
 import { useDialog } from '../context/DialogContext';
 
 interface TrashPanelProps {
@@ -11,7 +11,7 @@ interface TrashPanelProps {
 
 interface DeletedItem {
     id: string;
-    type: 'project' | 'scene' | 'shot';
+    type: 'project' | 'episode' | 'scene' | 'shot';
     name: string;
     deletedAt: string;
     projectId?: string;
@@ -46,14 +46,21 @@ export const TrashPanel: React.FC<TrashPanelProps> = ({ onProjectRestored }) => 
                 .eq('is_deleted', true)
                 .order('deleted_at', { ascending: false });
 
-            // 2. Fetch Deleted Scenes
+            // 2. Fetch Deleted Episodes
+            const { data: episodes } = await supabase
+                .from('episodes')
+                .select('*, projects(name)')
+                .eq('is_deleted', true)
+                .order('deleted_at', { ascending: false });
+
+            // 3. Fetch Deleted Scenes
             const { data: scenes } = await supabase
                 .from('scenes')
                 .select('*, projects(name)')
                 .eq('is_deleted', true)
                 .order('deleted_at', { ascending: false });
 
-            // 3. Fetch Deleted Shots
+            // 4. Fetch Deleted Shots
             const { data: shots } = await supabase
                 .from('shots')
                 .select('*, scenes(name, project_id, projects(name))')
@@ -74,6 +81,23 @@ export const TrashPanel: React.FC<TrashPanelProps> = ({ onProjectRestored }) => 
                     deletedAt: p.deleted_at,
                     projectId: p.id,
                     projectName: p.name
+                });
+            });
+
+            // Process Episodes
+            episodes?.forEach((e: any) => {
+                const pid = e.project_id;
+                const pname = e.projects?.name || 'Unknown Project';
+                if (!groups[pid]) {
+                    groups[pid] = { projectName: pname, items: [] };
+                }
+                groups[pid].items.push({
+                    id: e.id,
+                    type: 'episode',
+                    name: e.name,
+                    deletedAt: e.deleted_at,
+                    projectId: pid,
+                    projectName: pname
                 });
             });
 
@@ -131,6 +155,8 @@ export const TrashPanel: React.FC<TrashPanelProps> = ({ onProjectRestored }) => 
             if (item.type === 'project') {
                 await restoreProject(item.id);
                 if (onProjectRestored) onProjectRestored();
+            } else if (item.type === 'episode') {
+                await restoreEpisode(item.id);
             } else if (item.type === 'scene') {
                 await restoreScene(item.id);
             } else if (item.type === 'shot') {
@@ -215,6 +241,7 @@ export const TrashPanel: React.FC<TrashPanelProps> = ({ onProjectRestored }) => 
                                             <div className="flex items-start justify-between mb-2">
                                                 <div className="flex items-center gap-2 overflow-hidden">
                                                     {item.type === 'project' && <Folder className="text-blue-500 shrink-0" size={16} />}
+                                                    {item.type === 'episode' && <Clapperboard className="text-yellow-500 shrink-0" size={16} />}
                                                     {item.type === 'scene' && <Film className="text-purple-500 shrink-0" size={16} />}
                                                     {item.type === 'shot' && <Image className="text-green-500 shrink-0" size={16} />}
                                                     

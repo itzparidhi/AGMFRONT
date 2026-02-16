@@ -84,7 +84,8 @@ export const EpisodeList: React.FC = () => {
       async () => {
         try {
           await deleteEpisode(episodeId);
-          setEpisodes(prev => prev.filter(ep => ep.id !== episodeId));
+          // Refresh list to update sequence names (e.g. Episode 3 -> Episode 2)
+          await fetchEpisodes();
         } catch (err: any) {
           console.error("Failed to delete episode:", err);
           dialog.alert("Error", err.response?.data?.detail || "Failed to delete episode", 'danger');
@@ -105,10 +106,10 @@ export const EpisodeList: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 px-3 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+            className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors"
           >
-            <ArrowLeft size={18} />
-            <span>Back</span>
+            <ArrowLeft size={20} />
+            Back
           </button>
           <h1 className="text-3xl font-bold text-white">{projectName}</h1>
         </div>
