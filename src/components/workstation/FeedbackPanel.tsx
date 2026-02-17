@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { NotificationBell } from '../NotificationBell';
-import type { Version, Review, UserProfile } from '../../types';
-import { Image as ImageIcon, X, Maximize2, ChevronRight, ChevronLeft, MessageSquare, PenTool } from 'lucide-react';
+import type { Version, Review, UserProfile, TimestampComment } from '../../types';
+import { Image as ImageIcon, X, Maximize2, ChevronRight, ChevronLeft, MessageSquare, PenTool, Clock, Plus, Trash2 } from 'lucide-react';
 import { ImageViewerModal } from '../ImageViewerModal';
 import { ImageAnnotationModal } from '../ImageAnnotationModal';
 
@@ -15,6 +15,9 @@ interface FeedbackPanelProps {
     cdCommentRef: React.RefObject<HTMLTextAreaElement | null>;
     isCollapsed: boolean;
     toggleCollapse: () => void;
+    workstationMode: 'image' | 'video';
+    onSaveTimestamps?: (role: 'pm' | 'cd', timestamps: TimestampComment[]) => void;
+    currentVideoTime?: number;
 }
 
 export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
@@ -26,7 +29,10 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
     pmCommentRef,
     cdCommentRef,
     isCollapsed,
-    toggleCollapse
+    toggleCollapse,
+    workstationMode,
+    onSaveTimestamps,
+    currentVideoTime = 0
 }) => {
     const [pmFiles, setPmFiles] = useState<File[]>([]);
     const [cdFiles, setCdFiles] = useState<File[]>([]);
@@ -39,6 +45,54 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
 
     // Annotation State
     const [annotating, setAnnotating] = useState<{ type: 'pm' | 'cd', url: string } | null>(null);
+
+    // Timestamp Review State (Video Mode)
+    const [pmTimestamps, setPmTimestamps] = useState<TimestampComment[]>([]);
+    const [cdTimestamps, setCdTimestamps] = useState<TimestampComment[]>([]);
+    const [newTimestamp, setNewTimestamp] = useState<{ time: string; comment: string }>({ time: '', comment: '' });
+    const [activeTimestampRole, setActiveTimestampRole] = useState<'pm' | 'cd' | null>(null);
+
+    // Sync timestamps from review when it changes
+    React.useEffect(() => {
+        if (review) {
+            setPmTimestamps(review.pm_timestamps || []);
+            setCdTimestamps(review.cd_timestamps || []);
+        }
+    }, [review]);
+
+    React.useEffect(() => {
+        if (workstationMode === 'video' && currentVideoTime !== undefined) {
+            setNewTimestamp(prev => ({ ...prev, time: currentVideoTime.toFixed(1) }));
+        }
+    }, [currentVideoTime, workstationMode]);
+
+    const addTimestamp = (role: 'pm' | 'cd') => {
+        const timeVal = parseFloat(newTimestamp.time);
+        if (isNaN(timeVal) || !newTimestamp.comment.trim()) return;
+        const entry: TimestampComment = { time: timeVal, comment: newTimestamp.comment.trim() };
+        if (role === 'pm') {
+            setPmTimestamps(prev => [...prev, entry].sort((a, b) => a.time - b.time));
+        } else {
+            setCdTimestamps(prev => [...prev, entry].sort((a, b) => a.time - b.time));
+        }
+        setNewTimestamp({ time: '', comment: '' });
+    };
+
+    const removeTimestamp = (role: 'pm' | 'cd', index: number) => {
+        if (role === 'pm') {
+            setPmTimestamps(prev => prev.filter((_, i) => i !== index));
+        } else {
+            setCdTimestamps(prev => prev.filter((_, i) => i !== index));
+        }
+    };
+
+    const formatTime = (seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    const isVideoMode = workstationMode === 'video';
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'pm' | 'cd') => {
         if (e.target.files && e.target.files.length > 0) {
@@ -168,104 +222,176 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                     )}
                                     <div className="border-t border-white/10 pt-4">
                                         <h4 className="text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest">Review Notes</h4>
-                                        <textarea
-                                            key={`pm-${review.id}`}
-                                            ref={pmCommentRef}
-                                            defaultValue={review.pm_comment || ''}
-                                            className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-2 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500/50 resize-y"
-                                            placeholder={userProfile?.role === 'PM' ? "Write review..." : "No review yet."}
-                                            disabled={userProfile?.role !== 'PM'}
-                                        />
+                                        {!isVideoMode && (
+                                            <textarea
+                                                key={`pm-${review.id}`}
+                                                ref={pmCommentRef}
+                                                defaultValue={review.pm_comment || ''}
+                                                className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-2 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500/50 resize-y"
+                                                placeholder={userProfile?.role === 'PM' ? "Write review..." : "No review yet."}
+                                                disabled={userProfile?.role !== 'PM'}
+                                            />
+                                        )}
 
-                                        {/* PM Image Attachments */}
-                                        {(userProfile?.role === 'PM' || review.pm_image_url || review.pm_annotation_url) && (
+                                        {/* PM Feedback: Image vs Video mode */}
+                                        {isVideoMode ? (
+                                            /* VIDEO MODE: Timestamp Comments */
                                             <div className="mb-3">
-                                                {userProfile?.role === 'PM' && (
-                                                    <div className="flex items-center justify-between mb-2 gap-2">
-                                                        <div className='flex gap-2'>
-                                                            <button
-                                                                onClick={() => pmFileInputRef.current?.click()}
-                                                                className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500"
-                                                            >
-                                                                <ImageIcon size={12} /> Upload
-                                                            </button>
-
-                                                            <button
-                                                                onClick={() => startAnnotation('pm')}
-                                                                className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
-                                                            >
-                                                                <PenTool size={12} /> Annotate
-                                                            </button>
+                                                <h4 className="text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest flex items-center gap-1">
+                                                    <Clock size={10} /> Timestamp Notes
+                                                </h4>
+                                                {/* Existing timestamps */}
+                                                <div className="space-y-1.5 mb-3 max-h-40 overflow-y-auto">
+                                                    {pmTimestamps.map((ts, i) => (
+                                                        <div key={i} className="flex items-start gap-2 bg-black/30 p-2 rounded border border-zinc-700 group">
+                                                            <span className="text-[11px] font-mono text-cyan-400 bg-cyan-900/30 px-1.5 py-0.5 rounded shrink-0">
+                                                                {formatTime(ts.time)}
+                                                            </span>
+                                                            <span className="text-xs text-zinc-300 flex-1">{ts.comment}</span>
+                                                            {userProfile?.role === 'PM' && (
+                                                                <button onClick={() => removeTimestamp('pm', i)} className="text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            )}
                                                         </div>
-                                                        <input
-                                                            type="file"
-                                                            ref={pmFileInputRef}
-                                                            className="hidden"
-                                                            accept="image/*"
-                                                            multiple
-                                                            onChange={(e) => handleFileSelect(e, 'pm')}
-                                                        />
+                                                    ))}
+                                                    {pmTimestamps.length === 0 && (
+                                                        <p className="text-[10px] text-zinc-600 italic">No timestamp notes yet.</p>
+                                                    )}
+                                                </div>
+                                                {/* Add new timestamp */}
+                                                {userProfile?.role === 'PM' && (
+                                                    <div className="flex gap-2 items-end">
+                                                        <div className="flex flex-col gap-1">
+                                                            <label className="text-[9px] text-zinc-500 uppercase">Time (sec)</label>
+                                                            <input
+                                                                type="number"
+                                                                step="0.1"
+                                                                min="0"
+                                                                value={activeTimestampRole === 'pm' ? newTimestamp.time : ''}
+                                                                onFocus={() => setActiveTimestampRole('pm')}
+                                                                onChange={e => { setActiveTimestampRole('pm'); setNewTimestamp(prev => ({ ...prev, time: e.target.value })); }}
+                                                                className="w-16 bg-black/40 text-zinc-200 px-2 py-1 rounded border border-zinc-700 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                                                                placeholder="0"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 flex flex-col gap-1">
+                                                            <label className="text-[9px] text-zinc-500 uppercase">Comment</label>
+                                                            <input
+                                                                type="text"
+                                                                value={activeTimestampRole === 'pm' ? newTimestamp.comment : ''}
+                                                                onFocus={() => setActiveTimestampRole('pm')}
+                                                                onChange={e => { setActiveTimestampRole('pm'); setNewTimestamp(prev => ({ ...prev, comment: e.target.value })); }}
+                                                                onKeyDown={e => { if (e.key === 'Enter') addTimestamp('pm'); }}
+                                                                className="bg-black/40 text-zinc-200 px-2 py-1 rounded border border-zinc-700 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                                                                placeholder="Note at this timestamp..."
+                                                            />
+                                                        </div>
+                                                        <button
+                                                            onClick={() => addTimestamp('pm')}
+                                                            className="p-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded transition-colors"
+                                                            title="Add Timestamp Note"
+                                                        >
+                                                            <Plus size={14} />
+                                                        </button>
                                                     </div>
                                                 )}
-
-                                                {/* Previews & Saved Images */}
-                                                <div className="flex gap-2 flex-wrap">
-                                                    {/* New Uploads */}
-                                                    {pmFiles.map((file, i) => (
-                                                        <div key={`new-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-white/10">
-                                                            <img src={URL.createObjectURL(file)} alt="New attachment" className="w-full h-full object-cover" />
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                                                <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                                <button onClick={() => removeFile('pm', i, false)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* Saved Images */}
-                                                    {[
-                                                        ...(review.pm_image_urls || []),
-                                                        ...(review.pm_image_url ? [review.pm_image_url] : [])
-                                                    ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
-                                                        <div key={`saved-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-zinc-600 opacity-80">
-                                                            <img src={url} alt="Saved attachment" className="w-full h-full object-cover" />
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                <button onClick={() => setViewImage({ url, prompt: 'PM Attachment' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* New Annotations */}
-                                                    {pmAnnotationFiles.map((file, i) => (
-                                                        <div key={`new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50">
-                                                            <img src={URL.createObjectURL(file)} alt="New annotation" className="w-full h-full object-cover" />
-                                                            <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                                                <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                                <button onClick={() => removeFile('pm', i, true)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* Saved Annotations */}
-                                                    {[
-                                                        ...(review.pm_annotation_urls || []),
-                                                        ...(review.pm_annotation_url ? [review.pm_annotation_url] : [])
-                                                    ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
-                                                        <div key={`saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50 opacity-80">
-                                                            <img src={url} alt="Saved annotation" className="w-full h-full object-cover" />
-                                                            <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                <button onClick={() => setViewImage({ url, prompt: 'PM Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
                                             </div>
+                                        ) : (
+                                            /* IMAGE MODE: Original Image Attachments */
+                                            <>
+                                                {(userProfile?.role === 'PM' || review.pm_image_url || review.pm_annotation_url) && (
+                                                    <div className="mb-3">
+                                                        {userProfile?.role === 'PM' && (
+                                                            <div className="flex items-center justify-between mb-2 gap-2">
+                                                                <div className='flex gap-2'>
+                                                                    <button
+                                                                        onClick={() => pmFileInputRef.current?.click()}
+                                                                        className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500"
+                                                                    >
+                                                                        <ImageIcon size={12} /> Upload
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => startAnnotation('pm')}
+                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded border border-purple-800 hover:border-purple-600"
+                                                                    >
+                                                                        <PenTool size={12} /> Annotate
+                                                                    </button>
+                                                                </div>
+                                                                <input
+                                                                    type="file"
+                                                                    ref={pmFileInputRef}
+                                                                    className="hidden"
+                                                                    accept="image/*"
+                                                                    multiple
+                                                                    onChange={(e) => handleFileSelect(e, 'pm')}
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                        {/* Previews & Saved Images */}
+                                                        <div className="flex gap-2 flex-wrap">
+                                                            {/* New Uploads */}
+                                                            {pmFiles.map((file, i) => (
+                                                                <div key={`new-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-white/10">
+                                                                    <img src={URL.createObjectURL(file)} alt="New attachment" className="w-full h-full object-cover" />
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                                                        <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                        <button onClick={() => removeFile('pm', i, false)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+
+                                                            {/* Saved Images */}
+                                                            {[
+                                                                ...(review.pm_image_urls || []),
+                                                                ...(review.pm_image_url ? [review.pm_image_url] : [])
+                                                            ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
+                                                                <div key={`saved-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-zinc-600 opacity-80">
+                                                                    <img src={url} alt="Saved attachment" className="w-full h-full object-cover" />
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                        <button onClick={() => setViewImage({ url, prompt: 'PM Attachment' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+
+                                                            {/* New Annotations */}
+                                                            {pmAnnotationFiles.map((file, i) => (
+                                                                <div key={`new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50">
+                                                                    <img src={URL.createObjectURL(file)} alt="New annotation" className="w-full h-full object-cover" />
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                                                        <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                        <button onClick={() => removeFile('pm', i, true)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+
+                                                            {/* Saved Annotations */}
+                                                            {[
+                                                                ...(review.pm_annotation_urls || []),
+                                                                ...(review.pm_annotation_url ? [review.pm_annotation_url] : [])
+                                                            ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
+                                                                <div key={`saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50 opacity-80">
+                                                                    <img src={url} alt="Saved annotation" className="w-full h-full object-cover" />
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                        <button onClick={() => setViewImage({ url, prompt: 'PM Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
 
                                         {userProfile?.role === 'PM' && (
                                             <button
                                                 onClick={() => {
+                                                    if (isVideoMode && onSaveTimestamps) {
+                                                        onSaveTimestamps('pm', pmTimestamps);
+                                                    }
                                                     handleCommentSave('pm', pmFiles, pmAnnotationFiles);
                                                     setPmFiles([]);
                                                     setPmAnnotationFiles([]);
@@ -312,105 +438,175 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                     )}
                                     <div className="border-t border-white/10 pt-4">
                                         <h4 className="text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest">Review Notes</h4>
-                                        <textarea
-                                            key={`cd-${review.id}`}
-                                            ref={cdCommentRef}
-                                            defaultValue={review.cd_comment || ''}
-                                            className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-3 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500/50 resize-y"
-                                            placeholder={userProfile?.role === 'CD' ? "Write review..." : "No review yet."}
-                                            disabled={userProfile?.role !== 'CD'}
-                                        />
+                                        {!isVideoMode && (
+                                            <textarea
+                                                key={`cd-${review.id}`}
+                                                ref={cdCommentRef}
+                                                defaultValue={review.cd_comment || ''}
+                                                className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-2 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500/50 resize-y"
+                                                placeholder={userProfile?.role === 'CD' ? "Write review..." : "No review yet."}
+                                                disabled={userProfile?.role !== 'CD'}
+                                            />
+                                        )}
 
-                                        {/* CD Image Attachment */}
-                                        {(userProfile?.role === 'CD' || review.cd_image_url || review.cd_annotation_url) && (
+                                        {/* CD Feedback: Image vs Video mode */}
+                                        {isVideoMode ? (
+                                            /* VIDEO MODE: Timestamp Comments for CD */
                                             <div className="mb-3">
-                                                {userProfile?.role === 'CD' && (
-                                                    <div className="flex items-center justify-between mb-2 gap-2">
-                                                        <div className='flex gap-2'>
-                                                            <button
-                                                                onClick={() => cdFileInputRef.current?.click()}
-                                                                className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500"
-                                                            >
-                                                                <ImageIcon size={12} /> Upload
-                                                            </button>
-
-                                                            <button
-                                                                onClick={() => startAnnotation('cd')}
-                                                                className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
-                                                            >
-                                                                <PenTool size={12} /> Annotate
-                                                            </button>
+                                                <h4 className="text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest flex items-center gap-1">
+                                                    <Clock size={10} /> Timestamp Notes
+                                                </h4>
+                                                <div className="space-y-1.5 mb-3 max-h-40 overflow-y-auto">
+                                                    {cdTimestamps.map((ts, i) => (
+                                                        <div key={i} className="flex items-start gap-2 bg-black/30 p-2 rounded border border-zinc-700 group">
+                                                            <span className="text-[11px] font-mono text-cyan-400 bg-cyan-900/30 px-1.5 py-0.5 rounded shrink-0">
+                                                                {formatTime(ts.time)}
+                                                            </span>
+                                                            <span className="text-xs text-zinc-300 flex-1">{ts.comment}</span>
+                                                            {userProfile?.role === 'CD' && (
+                                                                <button onClick={() => removeTimestamp('cd', i)} className="text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                                                                    <Trash2 size={12} />
+                                                                </button>
+                                                            )}
                                                         </div>
-                                                        <input
-                                                            type="file"
-                                                            ref={cdFileInputRef}
-                                                            className="hidden"
-                                                            accept="image/*"
-                                                            multiple
-                                                            onChange={(e) => handleFileSelect(e, 'cd')}
-                                                        />
+                                                    ))}
+                                                    {cdTimestamps.length === 0 && (
+                                                        <p className="text-[10px] text-zinc-600 italic">No timestamp notes yet.</p>
+                                                    )}
+                                                </div>
+                                                {userProfile?.role === 'CD' && (
+                                                    <div className="flex gap-2 items-end">
+                                                        <div className="flex flex-col gap-1">
+                                                            <label className="text-[9px] text-zinc-500 uppercase">Time (sec)</label>
+                                                            <input
+                                                                type="number"
+                                                                step="0.1"
+                                                                min="0"
+                                                                value={activeTimestampRole === 'cd' ? newTimestamp.time : ''}
+                                                                onFocus={() => setActiveTimestampRole('cd')}
+                                                                onChange={e => { setActiveTimestampRole('cd'); setNewTimestamp(prev => ({ ...prev, time: e.target.value })); }}
+                                                                className="w-16 bg-black/40 text-zinc-200 px-2 py-1 rounded border border-zinc-700 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                                                                placeholder="0"
+                                                            />
+                                                        </div>
+                                                        <div className="flex-1 flex flex-col gap-1">
+                                                            <label className="text-[9px] text-zinc-500 uppercase">Comment</label>
+                                                            <input
+                                                                type="text"
+                                                                value={activeTimestampRole === 'cd' ? newTimestamp.comment : ''}
+                                                                onFocus={() => setActiveTimestampRole('cd')}
+                                                                onChange={e => { setActiveTimestampRole('cd'); setNewTimestamp(prev => ({ ...prev, comment: e.target.value })); }}
+                                                                onKeyDown={e => { if (e.key === 'Enter') addTimestamp('cd'); }}
+                                                                className="bg-black/40 text-zinc-200 px-2 py-1 rounded border border-zinc-700 text-xs focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                                                                placeholder="Note at this timestamp..."
+                                                            />
+                                                        </div>
+                                                        <button
+                                                            onClick={() => addTimestamp('cd')}
+                                                            className="p-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded transition-colors"
+                                                            title="Add Timestamp Note"
+                                                        >
+                                                            <Plus size={14} />
+                                                        </button>
                                                     </div>
                                                 )}
-
-
-                                                {/* Previews & Saved Images */}
-                                                <div className="flex gap-2 flex-wrap">
-                                                    {/* New Uploads */}
-                                                    {cdFiles.map((file, i) => (
-                                                        <div key={`cd-new-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-white/10">
-                                                            <img src={URL.createObjectURL(file)} alt="New attachment" className="w-full h-full object-cover" />
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                                                <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                                <button onClick={() => removeFile('cd', i, false)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* Saved Images */}
-                                                    {[
-                                                        ...(review.cd_image_urls || []),
-                                                        ...(review.cd_image_url ? [review.cd_image_url] : [])
-                                                    ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
-                                                        <div key={`cd-saved-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-zinc-600 opacity-80">
-                                                            <img src={url} alt="Saved attachment" className="w-full h-full object-cover" />
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                <button onClick={() => setViewImage({ url, prompt: 'CD Attachment' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* New Annotations */}
-                                                    {cdAnnotationFiles.map((file, i) => (
-                                                        <div key={`cd-new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50">
-                                                            <img src={URL.createObjectURL(file)} alt="New annotation" className="w-full h-full object-cover" />
-                                                            <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-                                                                <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                                <button onClick={() => removeFile('cd', i, true)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-
-                                                    {/* Saved Annotations */}
-                                                    {[
-                                                        ...(review.cd_annotation_urls || []),
-                                                        ...(review.cd_annotation_url ? [review.cd_annotation_url] : [])
-                                                    ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
-                                                        <div key={`cd-saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50 opacity-80">
-                                                            <img src={url} alt="Saved annotation" className="w-full h-full object-cover" />
-                                                            <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                                <button onClick={() => setViewImage({ url, prompt: 'CD Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
                                             </div>
+                                        ) : (
+                                            /* IMAGE MODE: Original CD Attachments */
+                                            <>
+                                                {(userProfile?.role === 'CD' || review.cd_image_url || review.cd_annotation_url) && (
+                                                    <div className="mb-3">
+                                                        {userProfile?.role === 'CD' && (
+                                                            <div className="flex items-center justify-between mb-2 gap-2">
+                                                                <div className='flex gap-2'>
+                                                                    <button
+                                                                        onClick={() => cdFileInputRef.current?.click()}
+                                                                        className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500"
+                                                                    >
+                                                                        <ImageIcon size={12} /> Upload
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => startAnnotation('cd')}
+                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded border border-purple-800 hover:border-purple-600"
+                                                                    >
+                                                                        <PenTool size={12} /> Annotate
+                                                                    </button>
+                                                                </div>
+                                                                <input
+                                                                    type="file"
+                                                                    ref={cdFileInputRef}
+                                                                    className="hidden"
+                                                                    accept="image/*"
+                                                                    multiple
+                                                                    onChange={(e) => handleFileSelect(e, 'cd')}
+                                                                />
+                                                            </div>
+                                                        )}
+
+
+                                                        {/* Previews & Saved Images */}
+                                                        <div className="flex gap-2 flex-wrap">
+                                                            {/* New Uploads */}
+                                                            {cdFiles.map((file, i) => (
+                                                                <div key={`cd-new-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-white/10">
+                                                                    <img src={URL.createObjectURL(file)} alt="New attachment" className="w-full h-full object-cover" />
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                                                        <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                        <button onClick={() => removeFile('cd', i, false)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+
+                                                            {/* Saved Images */}
+                                                            {[
+                                                                ...(review.cd_image_urls || []),
+                                                                ...(review.cd_image_url ? [review.cd_image_url] : [])
+                                                            ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
+                                                                <div key={`cd-saved-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-zinc-600 opacity-80">
+                                                                    <img src={url} alt="Saved attachment" className="w-full h-full object-cover" />
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                        <button onClick={() => setViewImage({ url, prompt: 'CD Attachment' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+
+                                                            {/* New Annotations */}
+                                                            {cdAnnotationFiles.map((file, i) => (
+                                                                <div key={`cd-new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50">
+                                                                    <img src={URL.createObjectURL(file)} alt="New annotation" className="w-full h-full object-cover" />
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                                                        <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                        <button onClick={() => removeFile('cd', i, true)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+
+                                                            {/* Saved Annotations */}
+                                                            {[
+                                                                ...(review.cd_annotation_urls || []),
+                                                                ...(review.cd_annotation_url ? [review.cd_annotation_url] : [])
+                                                            ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
+                                                                <div key={`cd-saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50 opacity-80">
+                                                                    <img src={url} alt="Saved annotation" className="w-full h-full object-cover" />
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                        <button onClick={() => setViewImage({ url, prompt: 'CD Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
                                         )}
 
                                         {userProfile?.role === 'CD' && (
                                             <button
                                                 onClick={() => {
+                                                    if (isVideoMode && onSaveTimestamps) {
+                                                        onSaveTimestamps('cd', cdTimestamps);
+                                                    }
                                                     handleCommentSave('cd', cdFiles, cdAnnotationFiles);
                                                     setCdFiles([]);
                                                     setCdAnnotationFiles([]);
@@ -505,7 +701,8 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                             </div>
                         )}
                     </>
-                )}
+                )
+                }
             </div>
 
             {/* Modal for viewing image */}
@@ -520,7 +717,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
             <ImageAnnotationModal
                 isOpen={!!annotating}
                 onClose={() => setAnnotating(null)}
-                imageUrl={annotating?.url || ''}
+                imageUrl={annotating ? annotating.url : ''}
                 onSave={handleAnnotationSave}
             />
         </>

@@ -62,6 +62,7 @@ export interface Version {
   gdrive_file_id: string | null;
   gdrive_link: string | null;
   public_link?: string; // Supabase Storage Link
+  media_type?: 'image' | 'video';
   is_active: boolean;
   created_at: string;
   users?: {
@@ -101,6 +102,11 @@ export interface Generation {
   };
 }
 
+export interface TimestampComment {
+  time: number;
+  comment: string;
+}
+
 export interface Review {
   id: string;
   version_id: string;
@@ -126,6 +132,10 @@ export interface Review {
   cd_annotation_urls?: string[] | null;
   master_cd_image_urls?: string[] | null;
   master_cd_annotation_urls?: string[] | null;
+  // Timestamp-based video reviews
+  pm_timestamps?: TimestampComment[] | null;
+  cd_timestamps?: TimestampComment[] | null;
+  master_cd_timestamps?: TimestampComment[] | null;
 }
 
 export interface Notification {
