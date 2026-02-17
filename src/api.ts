@@ -328,4 +328,49 @@ export const sendDailyReport = async () => {
   return response.data;
 };
 
+export const saveScriptVersion = async (episodeId: string, file: File, uploaderId: string) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('episode_id', episodeId);
+  formData.append('uploader_id', uploaderId);
+
+  const response = await api.post('/assets/script/save', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const getLatestScriptVersion = async (episodeId: string) => {
+  const response = await api.get(`/assets/script/${episodeId}/latest`);
+  return response.data;
+};
+
+export const getScriptVersions = async (episodeId: string) => {
+  const response = await api.get(`/assets/script/${episodeId}/versions`);
+  return response.data;
+};
+
+export const getMoodboardVersions = async (episodeId: string) => {
+  const response = await api.get(`/assets/moodboard/${episodeId}/versions`);
+  return response.data;
+};
+
+export const saveMoodboard = async (episodeId: string, files: File[], uploaderId: string) => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  formData.append('episode_id', episodeId);
+  formData.append('uploader_id', uploaderId);
+
+  const response = await api.post('/assets/moodboard/save', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
 export default api;

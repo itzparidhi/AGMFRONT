@@ -136,3 +136,25 @@ export interface Notification {
   is_read: boolean;
   created_at: string;
 }
+
+export interface ScriptVersion {
+  id: string;
+  episode_id: string;
+  content: string;
+  version_number: number;
+  is_active: boolean;
+  uploader_id: string;
+  created_at: string;
+}
+
+export interface Asset {
+  id: string;
+  name: string;
+  type: 'script' | 'character' | 'moodboard' | 'storyboard';
+  url: string;
+  created_at: string;
+  episode_number?: number; // For script type (which are episodes)
+  version_number?: number; // For script versions
+  content?: string; // For script versions
+  uploader_id?: string;
+}
