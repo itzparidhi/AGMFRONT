@@ -1,10 +1,10 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Loader2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, Loader2, X, ChevronLeft, ChevronRight, ImageIcon, Film } from 'lucide-react';
 import { ImageViewerModal } from '../components/ImageViewerModal';
 import { useWorkstation } from '../hooks/useWorkstation';
-import { generateImage, fetchGenerations } from '../api';
-import type { Generation, Version } from '../types';
+import { generateImage, fetchGenerations, saveTimestampReview } from '../api';
+import type { Generation, Version, TimestampComment } from '../types';
 import { DriveIcon } from '../components/DriveIcon';
 import { supabase } from '../supabaseClient';
 
@@ -22,6 +22,10 @@ import { useDialog } from '../context/DialogContext';
 export const Workstation: React.FC = () => {
   const navigate = useNavigate();
   const dialog = useDialog();
+
+  // Workstation Mode: Image or Video
+  const [workstationMode, setWorkstationMode] = useState<'image' | 'video'>('image');
+  const [currentVideoTime, setCurrentVideoTime] = useState(0);
 
   // AI Generation State
   const [prompt, setPrompt] = useState('');
@@ -100,6 +104,21 @@ export const Workstation: React.FC = () => {
   // Version Hover Preview State
   const [hoveredVersion, setHoveredVersion] = useState<{ v: Version; x: number; y: number } | null>(null);
 
+  // Filter versions by current workstation mode
+  const filteredVersions = versions.filter(v => {
+    const mt = v.media_type || 'image';
+    return mt === workstationMode;
+  });
+
+  // Auto-switch activeVersion when mode changes
+  useEffect(() => {
+    const active = filteredVersions.find(v => v.is_active) || filteredVersions[0];
+    setActiveVersion(active || null);
+    if (active) {
+      fetchReview(active.id);
+    }
+    setSelectedGeneration(null);
+  }, [workstationMode, versions.length]);
   // Fetch all shots in the scene for navigation (filtered by assigned PE if user is PE)
   useEffect(() => {
     const fetchSceneShots = async () => {
@@ -830,100 +849,113 @@ export const Workstation: React.FC = () => {
   // Feedback Panel Collapse State
   const [isFeedbackCollapsed, setIsFeedbackCollapsed] = useState(false);
 
+  // Handler for saving timestamp reviews
+  const handleSaveTimestamps = async (role: 'pm' | 'cd', timestamps: TimestampComment[]) => {
+    if (!activeVersion) return;
+    try {
+      await saveTimestampReview(activeVersion.id, role, timestamps);
+      await fetchReview(activeVersion.id); // Refresh data
+    } catch (err) {
+      console.error('Failed to save timestamp review:', err);
+    }
+  };
+
   if (!shot) return <div className="text-white p-8">Loading shot...</div>;
 
   return (
     <div className="flex h-screen bg-zinc-900 text-zinc-100 overflow-hidden">
-      {/* Col 1: Reference */}
-      <div className="w-1/4 min-w-[300px] shrink-0 border-r border-white/10 p-5 flex flex-col overflow-y-auto bg-zinc-900/50 backdrop-blur-sm z-10 scrollbar-thin scrollbar-thumb-white/10">
-        <ReferencePanel
-          shot={shot}
-          userProfile={userProfile}
-          uploadingRefs={uploadingRefs}
-          openAccordion={openAccordion}
-          toggleAccordion={toggleAccordion}
-          handleReferenceUpload={handleReferenceUpload}
-          setFullScreenImage={setFullScreenImage}
-          setZoomLevel={setZoomLevel}
-          navigate={navigate}
+      {/* Col 1: Reference + Generation Tools (hidden in video mode) */}
+      {workstationMode === 'image' && (
+        <div className="w-1/4 min-w-[300px] shrink-0 border-r border-white/10 p-5 flex flex-col overflow-y-auto bg-zinc-900/50 backdrop-blur-sm z-10 scrollbar-thin scrollbar-thumb-white/10">
+          <ReferencePanel
+            shot={shot}
+            userProfile={userProfile}
+            uploadingRefs={uploadingRefs}
+            openAccordion={openAccordion}
+            toggleAccordion={toggleAccordion}
+            handleReferenceUpload={handleReferenceUpload}
+            setFullScreenImage={setFullScreenImage}
+            setZoomLevel={setZoomLevel}
+            navigate={navigate}
 
-          projectId={projectId}
-          episodeId={episodeId}
-          selectedBackgroundUrl={selectedBackgroundUrl}
-          setSelectedBackgroundUrl={setSelectedBackgroundUrl}
-        />
+            projectId={projectId}
+            episodeId={episodeId}
+            selectedBackgroundUrl={selectedBackgroundUrl}
+            setSelectedBackgroundUrl={setSelectedBackgroundUrl}
+          />
 
-        <GenerationTools
-          generationMode={generationMode}
-          setGenerationMode={setGenerationMode}
-          prompt={prompt}
-          handlePromptChange={handlePromptChange}
-          textareaRef={textareaRef}
-          handleDragOver={handleDragOver}
-          handleDropRef={handleDropRef}
-          showTagMenu={showTagMenu}
-          refImages={refImages}
-          insertTag={insertTag}
-          removeRefImage={removeRefImage}
-          refInputRef={refInputRef}
-          handleRefImageSelect={handleRefImageSelect}
-          selectedAutoTabs={selectedAutoTabs}
-          setSelectedAutoTabs={setSelectedAutoTabs}
-          fileInputRefs={fileInputRefs}
-          handleAutoStoryboardUpload={handleAutoStoryboardUpload}
-          autoStoryboardFile={autoStoryboardFile}
-          setAutoStoryboardFile={setAutoStoryboardFile}
-          shot={shot}
+          <GenerationTools
+            generationMode={generationMode}
+            setGenerationMode={setGenerationMode}
+            prompt={prompt}
+            handlePromptChange={handlePromptChange}
+            textareaRef={textareaRef}
+            handleDragOver={handleDragOver}
+            handleDropRef={handleDropRef}
+            showTagMenu={showTagMenu}
+            refImages={refImages}
+            insertTag={insertTag}
+            removeRefImage={removeRefImage}
+            refInputRef={refInputRef}
+            handleRefImageSelect={handleRefImageSelect}
+            selectedAutoTabs={selectedAutoTabs}
+            setSelectedAutoTabs={setSelectedAutoTabs}
+            fileInputRefs={fileInputRefs}
+            handleAutoStoryboardUpload={handleAutoStoryboardUpload}
+            autoStoryboardFile={autoStoryboardFile}
+            setAutoStoryboardFile={setAutoStoryboardFile}
+            shot={shot}
 
-          handleAutoBackgroundUpload={handleAutoBackgroundUpload}
-          autoBackgroundFile={autoBackgroundFile}
-          setAutoBackgroundFile={setAutoBackgroundFile}
-          characterTabs={characterTabs}
-          autoCharacterFiles={autoCharacterFiles}
-          handleAutoCharacterUpload={handleAutoCharacterUpload}
-          removeAutoCharacterFile={removeAutoCharacterFile}
-          addCharacterTab={addCharacterTab}
-          removeCharacterTab={removeCharacterTab}
-          selectedModel={selectedModel}
-          setSelectedModel={setSelectedModel}
-          aspectRatio={aspectRatio}
-          setAspectRatio={setAspectRatio}
-          resolution={resolution}
-          setResolution={setResolution}
-          handleGenerate={handleGenerate}
-          isGenerating={isGenerating}
-          uploadingRefs={uploadingRefs}
-          // Angles Props
-          anglesAngle={anglesAngle}
-          setAnglesAngle={setAnglesAngle}
-          anglesLength={anglesLength}
-          setAnglesLength={setAnglesLength}
-          anglesFocus={anglesFocus}
-          setAnglesFocus={setAnglesFocus}
-          anglesBackground={anglesBackground}
-          setAnglesBackground={setAnglesBackground}
-          anglesAnchorFile={anglesAnchorFile}
-          setAnglesAnchorFile={setAnglesAnchorFile}
-          handleAnglesAnchorUpload={handleAnglesAnchorUpload}
-          anglesTargetFile={anglesTargetFile}
-          setAnglesTargetFile={setAnglesTargetFile}
-          handleAnglesTargetUpload={handleAnglesTargetUpload}
-          // BG Grid
-          backgroundGridFile={backgroundGridFile}
-          setBackgroundGridFile={setBackgroundGridFile}
-          handleBackgroundGridUpload={handleBackgroundGridUpload}
-          // Project ID
-          projectId={projectId}
-          // Character mention
-          showCharacterModalFromMention={showCharacterModalFromMention}
-          onCharacterMentionSelect={handleCharacterMentionSelect}
-          onCloseCharacterMention={() => setShowCharacterModalFromMention(false)}
-          selectedCharacters={selectedCharacters}
-          setSelectedCharacters={setSelectedCharacters}
-          selectedBackgroundUrl={selectedBackgroundUrl}
-          onDirectCharacterUpload={handleDirectCharacterUpload}
-        />
-      </div>
+            handleAutoBackgroundUpload={handleAutoBackgroundUpload}
+            autoBackgroundFile={autoBackgroundFile}
+            setAutoBackgroundFile={setAutoBackgroundFile}
+            characterTabs={characterTabs}
+            autoCharacterFiles={autoCharacterFiles}
+            handleAutoCharacterUpload={handleAutoCharacterUpload}
+            removeAutoCharacterFile={removeAutoCharacterFile}
+            addCharacterTab={addCharacterTab}
+            removeCharacterTab={removeCharacterTab}
+            selectedModel={selectedModel}
+            setSelectedModel={setSelectedModel}
+            aspectRatio={aspectRatio}
+            setAspectRatio={setAspectRatio}
+            resolution={resolution}
+            setResolution={setResolution}
+            handleGenerate={handleGenerate}
+            isGenerating={isGenerating}
+            uploadingRefs={uploadingRefs}
+            // Angles Props
+            anglesAngle={anglesAngle}
+            setAnglesAngle={setAnglesAngle}
+            anglesLength={anglesLength}
+            setAnglesLength={setAnglesLength}
+            anglesFocus={anglesFocus}
+            setAnglesFocus={setAnglesFocus}
+            anglesBackground={anglesBackground}
+            setAnglesBackground={setAnglesBackground}
+            anglesAnchorFile={anglesAnchorFile}
+            setAnglesAnchorFile={setAnglesAnchorFile}
+            handleAnglesAnchorUpload={handleAnglesAnchorUpload}
+            anglesTargetFile={anglesTargetFile}
+            setAnglesTargetFile={setAnglesTargetFile}
+            handleAnglesTargetUpload={handleAnglesTargetUpload}
+            // BG Grid
+            backgroundGridFile={backgroundGridFile}
+            setBackgroundGridFile={setBackgroundGridFile}
+            handleBackgroundGridUpload={handleBackgroundGridUpload}
+            // Project ID
+            projectId={projectId}
+            // Character mention
+            showCharacterModalFromMention={showCharacterModalFromMention}
+            onCharacterMentionSelect={handleCharacterMentionSelect}
+            onCloseCharacterMention={() => setShowCharacterModalFromMention(false)}
+            selectedCharacters={selectedCharacters}
+            setSelectedCharacters={setSelectedCharacters}
+            selectedBackgroundUrl={selectedBackgroundUrl}
+            onDirectCharacterUpload={handleDirectCharacterUpload}
+          />
+        </div>
+      )}
 
       <ImageViewerModal
         isOpen={viewerState.isOpen}
@@ -941,6 +973,28 @@ export const Workstation: React.FC = () => {
 
       {/* Col 2: Canvas (Flex-1 to take available space) */}
       <div className="flex-1 min-w-0 border-r border-zinc-700 p-4 flex flex-col relative transition-all duration-300">
+        {/* Image / Video Toggle */}
+        <div className="flex items-center justify-center gap-1 mb-3">
+          <button
+            onClick={() => setWorkstationMode('image')}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-l-full text-xs font-bold uppercase tracking-wider transition-all ${workstationMode === 'image'
+              ? 'bg-white text-black shadow-lg'
+              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+              }`}
+          >
+            <ImageIcon size={14} /> Image
+          </button>
+          <button
+            onClick={() => setWorkstationMode('video')}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-r-full text-xs font-bold uppercase tracking-wider transition-all ${workstationMode === 'video'
+              ? 'bg-white text-black shadow-lg'
+              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+              }`}
+          >
+            <Film size={14} /> Video
+          </button>
+        </div>
+
         <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
           {/* Center: Shot Name and Version */}
           <h2 className="text-xl font-bold text-center flex-1">
@@ -977,11 +1031,10 @@ export const Workstation: React.FC = () => {
           <button
             onClick={navigateToPreviousShot}
             disabled={currentShotIndex <= 0}
-            className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full flex items-center justify-center transition-all border border-white/10 shadow-lg ${
-              currentShotIndex <= 0
-                ? 'bg-black/50 text-zinc-600 cursor-not-allowed'
-                : 'bg-zinc-900/90 text-white hover:bg-zinc-800 hover:scale-110 hover:border-white/30'
-            }`}
+            className={`absolute left-24 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${currentShotIndex <= 0
+              ? 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
+              : 'bg-zinc-800/80 text-white hover:bg-zinc-700 hover:scale-110'
+              }`}
             title="Previous Shot"
           >
             <ChevronLeft size={32} />
@@ -991,11 +1044,10 @@ export const Workstation: React.FC = () => {
           <button
             onClick={navigateToNextShot}
             disabled={currentShotIndex >= sceneShots.length - 1}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full flex items-center justify-center transition-all border border-white/10 shadow-lg ${
-              currentShotIndex >= sceneShots.length - 1
-                ? 'bg-black/50 text-zinc-600 cursor-not-allowed'
-                : 'bg-zinc-900/90 text-white hover:bg-zinc-800 hover:scale-110 hover:border-white/30'
-            }`}
+            className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${currentShotIndex >= sceneShots.length - 1
+              ? 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
+              : 'bg-zinc-800/80 text-white hover:bg-zinc-700 hover:scale-110'
+              }`}
             title="Next Shot"
           >
             <ChevronRight size={32} />
@@ -1003,7 +1055,7 @@ export const Workstation: React.FC = () => {
 
           {/* Version List (Left Side of Canvas) */}
           <div className="w-20 flex flex-col gap-2 overflow-y-auto pr-2">
-            {versions.map(v => (
+            {filteredVersions.map(v => (
               <button
                 key={v.id}
                 onMouseEnter={(e) => {
@@ -1017,9 +1069,13 @@ export const Workstation: React.FC = () => {
                   ${activeVersion?.id === v.id ? 'border-white-500 bg-white-900/20 text-white' : 'border-zinc-700 bg-zinc-800 text-zinc-500 hover:border-zinc-500'}
                 `}
               >
+                {workstationMode === 'video' && <Film size={10} className="mr-0.5 opacity-60" />}
                 v{v.version_number}
               </button>
             ))}
+            {filteredVersions.length === 0 && (
+              <div className="text-[10px] text-zinc-600 text-center py-2">No {workstationMode} versions</div>
+            )}
           </div>
 
           {/* Main Player */}
@@ -1028,6 +1084,8 @@ export const Workstation: React.FC = () => {
             activeVersion={activeVersion}
             setFullScreenImage={setFullScreenImage}
             setZoomLevel={setZoomLevel}
+            workstationMode={workstationMode}
+            onTimeUpdate={setCurrentVideoTime}
           />
         </div>
 
@@ -1061,7 +1119,7 @@ export const Workstation: React.FC = () => {
                   ref={customUploadRef}
                   className="hidden"
                   onChange={handleUpload}
-                  accept="image/*"
+                  accept={workstationMode === 'video' ? 'video/*' : 'image/*'}
                 />
                 <button
                   onClick={handleApprovalClick}
@@ -1139,23 +1197,25 @@ export const Workstation: React.FC = () => {
 
       {/* Version Hover Preview Tooltip */}
       {hoveredVersion && (
-        <div 
+        <div
           className="fixed z-[100] w-64 bg-zinc-900 border border-zinc-600 rounded-lg shadow-2xl p-3 pointer-events-none flex flex-col gap-2"
           style={{ top: hoveredVersion.y, left: hoveredVersion.x }}
         >
-          <div className="aspect-video relative bg-zinc-800 rounded overflow-hidden flex items-center justify-center">
-             {(hoveredVersion.v.public_link || hoveredVersion.v.gdrive_link) ? (
-                <DriveImage 
-                  src={hoveredVersion.v.public_link || hoveredVersion.v.gdrive_link} 
-                  alt={`v${hoveredVersion.v.version_number}`}
-                  className="w-full h-full object-cover"
-                />
-             ) : (
-                <span className="text-xs text-zinc-500">No Preview</span>
-             )}
-          </div>
-          <div className="text-xs text-zinc-300">
-            <div className="font-bold flex justify-between items-center">
+          <div className="p-2">
+            {hoveredVersion.v.media_type === 'video' ? (
+              <div className="w-full h-32 flex items-center justify-center bg-zinc-800 rounded">
+                <Film size={32} className="text-zinc-500" />
+              </div>
+            ) : (hoveredVersion.v.public_link || hoveredVersion.v.gdrive_link) ? (
+              <img
+                src={hoveredVersion.v.public_link || hoveredVersion.v.gdrive_link || ''}
+                alt={`v${hoveredVersion.v.version_number}`}
+                className="w-full h-32 object-contain rounded"
+              />
+            ) : (
+              <div className="w-full h-32 flex items-center justify-center bg-zinc-800 rounded text-zinc-600 text-xs">No preview</div>
+            )}
+            <div className="mt-2 flex items-center justify-between">
               <span>v{hoveredVersion.v.version_number}</span>
               <span className="text-[10px] text-zinc-500 font-normal">{new Date(hoveredVersion.v.created_at).toLocaleDateString()}</span>
             </div>
@@ -1178,6 +1238,9 @@ export const Workstation: React.FC = () => {
         cdCommentRef={cdCommentRef}
         isCollapsed={isFeedbackCollapsed}
         toggleCollapse={() => setIsFeedbackCollapsed(!isFeedbackCollapsed)}
+        workstationMode={workstationMode}
+        onSaveTimestamps={handleSaveTimestamps}
+        currentVideoTime={currentVideoTime}
       />
     </div >
   );

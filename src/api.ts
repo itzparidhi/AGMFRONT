@@ -373,4 +373,16 @@ export const saveMoodboard = async (episodeId: string, files: File[], uploaderId
   return response.data;
 };
 
+export const saveTimestampReview = async (
+  versionId: string,
+  role: 'pm' | 'cd' | 'master_cd',
+  timestamps: { time: number; comment: string }[]
+) => {
+  const response = await api.post(`/reviews/${versionId}/timestamps`, {
+    role,
+    timestamps
+  });
+  return response.data;
+};
+
 export default api;
