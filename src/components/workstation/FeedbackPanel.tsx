@@ -148,7 +148,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                         <button
                                             disabled={userProfile?.role !== 'PM'}
                                             onClick={() => handleVote('pm', false)}
-                                            className={`flex-1 py-2 rounded-lg font-bold transition-all ${review.pm_vote === false ? 'bg-red-600/80 text-white shadow-lg' : 'bg-black/20 text-zinc-500 hover:bg-white/5 border border-white/5'}`}
+                                            className={`flex-1 py-2 rounded-full border-2 font-bold transition-all ${review.pm_vote === false ? 'border-red-500 bg-red-500/20 text-white' : 'border-zinc-700 bg-zinc-800 text-zinc-500 hover:border-zinc-500'}`}
                                         >
                                             NO
                                         </button>
@@ -189,9 +189,10 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                             >
                                                                 <ImageIcon size={12} /> Upload
                                                             </button>
+
                                                             <button
                                                                 onClick={() => startAnnotation('pm')}
-                                                                className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded border border-purple-800 hover:border-purple-600"
+                                                                className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
                                                             >
                                                                 <PenTool size={12} /> Annotate
                                                             </button>
@@ -269,7 +270,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                     setPmFiles([]);
                                                     setPmAnnotationFiles([]);
                                                 }}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-1 rounded text-sm font-bold  border-white-500 bg-white-900/20 text-white "
+                                                className="glass-button w-full"
                                             >
                                                 Save Review
                                             </button>
@@ -332,9 +333,10 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                             >
                                                                 <ImageIcon size={12} /> Upload
                                                             </button>
+
                                                             <button
                                                                 onClick={() => startAnnotation('cd')}
-                                                                className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded border border-purple-800 hover:border-purple-600"
+                                                                className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
                                                             >
                                                                 <PenTool size={12} /> Annotate
                                                             </button>
@@ -413,7 +415,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                     setCdFiles([]);
                                                     setCdAnnotationFiles([]);
                                                 }}
-                                                className="w-full bg-blue-100 hover:bg-blue-200 text-black py-1 rounded text-sm font-bold"
+                                                className="glass-button w-full"
                                             >
                                                 Save Review
                                             </button>

@@ -581,7 +581,7 @@ export const SceneList: React.FC<SceneListProps> = ({ projectId, episodeId }) =>
           <button
             onClick={handleSendReport}
             disabled={isSendingReport}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors disabled:opacity-50"
+            className="glass-button flex items-center gap-2 disabled:opacity-50"
           >
             {isSendingReport ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
             <span>Send Daily Report</span>

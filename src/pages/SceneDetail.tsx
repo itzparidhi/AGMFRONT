@@ -202,7 +202,7 @@ export const SceneDetail: React.FC = () => {
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate(`/project/${projectId}`)}
-              className="text-zinc-400 hover:text-white flex items-center gap-2"
+              className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors"
             >
               <ArrowLeft size={20} /> Back
             </button>

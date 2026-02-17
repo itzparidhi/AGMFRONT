@@ -122,15 +122,20 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                 </h3>
 
                 <div className="mb-8">
-                    <label className="block text-xs font-bold uppercase text-zinc-500 mb-2 tracking-wider">Select Project</label>
-                    <select
-                        className="w-full bg-black/20 border border-white/10 rounded-xl p-4 text-white text-lg focus:ring-2 focus:ring-white/20 focus:border-white/30 transition-all cursor-pointer hover:bg-white/5"
-                        onChange={handleProjectSelect}
-                        value={selectedProjectId}
-                    >
-                        <option value="" className="bg-zinc-900">Select Project...</option>
-                        {projects.map(p => <option key={p.id} value={p.id} className="bg-zinc-900">{p.name}</option>)}
-                    </select>
+                    <label className="block text-[10px] font-bold uppercase text-zinc-500 mb-2 tracking-widest">Select Project</label>
+                    <div className="relative">
+                        <select
+                            className="w-full bg-zinc-900 text-zinc-200 p-3 rounded-lg border-transparent appearance-none focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all cursor-pointer hover:bg-zinc-800"
+                            onChange={handleProjectSelect}
+                            value={selectedProjectId}
+                        >
+                            <option value="" className="bg-zinc-900 text-zinc-500">Select Project...</option>
+                            {projects.map(p => <option key={p.id} value={p.id} className="bg-black text-white py-2">{p.name}</option>)}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-zinc-500">
+                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                    </div>
                 </div>
 
                 {selectedProjectId && (

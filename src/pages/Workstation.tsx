@@ -59,6 +59,7 @@ export const Workstation: React.FC = () => {
 
   // Project ID for character resources
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [episodeId, setEpisodeId] = useState<string | null>(null);
   const [showCharacterModalFromMention, setShowCharacterModalFromMention] = useState(false);
   const [selectedCharacters, setSelectedCharacters] = useState<any[]>([]);
 
@@ -159,21 +160,24 @@ export const Workstation: React.FC = () => {
       dialog.alert('Error', 'Failed to save backgrounds.', 'danger');
     }
   };
-  // Fetch project ID from scene when shot loads
+  // Fetch project ID and episode ID from scene when shot loads
   useEffect(() => {
-    const fetchProjectId = async () => {
+    const fetchSceneData = async () => {
       if (!shot?.scene_id) return;
 
       const { data } = await supabase
         .from('scenes')
-        .select('project_id')
+        .select('project_id, episode_id')
         .eq('id', shot.scene_id)
         .single();
 
-      if (data) setProjectId(data.project_id);
+      if (data) {
+        setProjectId(data.project_id);
+        setEpisodeId(data.episode_id);
+      }
     };
 
-    fetchProjectId();
+    fetchSceneData();
   }, [shot?.scene_id]);
 
 
@@ -844,6 +848,7 @@ export const Workstation: React.FC = () => {
           navigate={navigate}
 
           projectId={projectId}
+          episodeId={episodeId}
           selectedBackgroundUrl={selectedBackgroundUrl}
           setSelectedBackgroundUrl={setSelectedBackgroundUrl}
         />
@@ -972,28 +977,28 @@ export const Workstation: React.FC = () => {
           <button
             onClick={navigateToPreviousShot}
             disabled={currentShotIndex <= 0}
-            className={`absolute left-24 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+            className={`absolute left-4 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full flex items-center justify-center transition-all border border-white/10 shadow-lg ${
               currentShotIndex <= 0
-                ? 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
-                : 'bg-zinc-800/80 text-white hover:bg-zinc-700 hover:scale-110'
+                ? 'bg-black/50 text-zinc-600 cursor-not-allowed'
+                : 'bg-zinc-900/90 text-white hover:bg-zinc-800 hover:scale-110 hover:border-white/30'
             }`}
             title="Previous Shot"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={32} />
           </button>
 
           {/* Next Shot Button - Right Overlay */}
           <button
             onClick={navigateToNextShot}
             disabled={currentShotIndex >= sceneShots.length - 1}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+            className={`absolute right-4 top-1/2 -translate-y-1/2 z-20 w-16 h-16 rounded-full flex items-center justify-center transition-all border border-white/10 shadow-lg ${
               currentShotIndex >= sceneShots.length - 1
-                ? 'bg-zinc-800/50 text-zinc-600 cursor-not-allowed'
-                : 'bg-zinc-800/80 text-white hover:bg-zinc-700 hover:scale-110'
+                ? 'bg-black/50 text-zinc-600 cursor-not-allowed'
+                : 'bg-zinc-900/90 text-white hover:bg-zinc-800 hover:scale-110 hover:border-white/30'
             }`}
             title="Next Shot"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={32} />
           </button>
 
           {/* Version List (Left Side of Canvas) */}

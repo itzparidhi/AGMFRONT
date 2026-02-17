@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react';
 import { DriveImage } from '../DriveImage';
 import { supabase } from '../../supabaseClient';
 import type { Shot, UserProfile } from '../../types';
@@ -22,8 +22,9 @@ interface ReferencePanelProps {
     handleReferenceUpload: (e: React.ChangeEvent<HTMLInputElement>, type: 'storyboard' | 'style') => void;
     setFullScreenImage: (url: string | null) => void;
     setZoomLevel: (level: number) => void;
-    navigate: (path: number) => void;
+    navigate: any;
     projectId: string | null;
+    episodeId: string | null;
     selectedBackgroundUrl: string | null;
     setSelectedBackgroundUrl: (url: string | null) => void;
 }
@@ -39,6 +40,7 @@ export const ReferencePanel: React.FC<ReferencePanelProps> = ({
     setZoomLevel,
     navigate,
     projectId,
+    episodeId,
     selectedBackgroundUrl,
     setSelectedBackgroundUrl,
 }) => {
@@ -81,7 +83,22 @@ export const ReferencePanel: React.FC<ReferencePanelProps> = ({
 
     return (
         <div className="w-full">
-            <button onClick={() => navigate(-1)} className="mb-4 text-zinc-400 hover:text-white self-start">← Back</button>
+            <button 
+                onClick={() => {
+                   // Navigate to Timeline (Episode view) if episode_id exists
+                   if (projectId && episodeId) {
+                       navigate(`/project/${projectId}/episode/${episodeId}`);
+                   } else if (projectId && shot.scene_id) {
+                       // Fallback to Scene Detail if no episode
+                       navigate(`/project/${projectId}/scene/${shot.scene_id}`);
+                   } else {
+                       navigate(-1);
+                   }
+                }} 
+                className="mb-4 text-zinc-400 hover:text-white flex items-center gap-2 transition-colors"
+            >
+                <ArrowLeft size={20} /> Back
+            </button>
 
             <h1 className="text-2xl font-bold mb-6 text-white">References</h1>
 

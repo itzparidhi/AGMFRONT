@@ -189,8 +189,7 @@ export const Timeline: React.FC = () => {
               onClick={() => navigate(`/project/${project.id}`)} 
               className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors"
             >
-              <ArrowLeft size={20} /> 
-              Back
+              <ArrowLeft size={20} /> Back
             </button>
             <h1 className="text-2xl font-bold">{episodeName || project.name}</h1>
           </div>

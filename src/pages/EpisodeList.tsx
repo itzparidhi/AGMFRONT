@@ -108,10 +108,9 @@ export const EpisodeList: React.FC = () => {
             onClick={() => navigate('/')}
             className="text-zinc-400 hover:text-white flex items-center gap-2 transition-colors"
           >
-            <ArrowLeft size={20} />
-            Back
+            <ArrowLeft size={20} /> Back
           </button>
-          <h1 className="text-3xl font-bold text-white">{projectName}</h1>
+          <h1 className="text-2xl font-bold text-white">{projectName}</h1>
         </div>
         {(userProfile?.role === 'CD' || userProfile?.role === 'PM') && (
           <button
