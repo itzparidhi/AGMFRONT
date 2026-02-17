@@ -371,6 +371,44 @@ export const saveMoodboard = async (episodeId: string, files: File[], uploaderId
     },
   });
   return response.data;
+  return response.data;
+};
+
+// Character API
+export const getCharacters = async (projectId: string) => {
+  const response = await api.get(`/characters/${projectId}`);
+  return response.data;
+};
+
+export const createCharacter = async (name: string, ageGroup: string, projectId: string) => {
+  const response = await api.post('/characters/create', {
+    name,
+    age_group: ageGroup,
+    project_id: projectId
+  });
+  return response.data;
+};
+
+export const saveCharacterImages = async (characterId: string, files: File[], projectId: string, uploaderId: string) => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  formData.append('character_id', characterId);
+  formData.append('project_id', projectId);
+  formData.append('uploader_id', uploaderId);
+
+  const response = await api.post('/characters/save_images', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
+export const deleteCharacter = async (characterId: string) => {
+  const response = await api.delete(`/characters/${characterId}`);
+  return response.data;
 };
 
 export default api;

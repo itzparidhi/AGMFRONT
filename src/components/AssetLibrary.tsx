@@ -2,10 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Project, Asset } from '../types';
 import { getProjectAssets, uploadAsset, deleteProjectAsset } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, Film, CheckSquare } from 'lucide-react';
+import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, Film, CheckSquare, UserPlus, User } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 import { ScriptVersionsModal } from './ScriptVersionsModal';
 import { MoodboardVersionsModal } from './MoodboardVersionsModal';
+import { CreateCharacterModal } from './CreateCharacterModal';
+import { CharacterDetailsModal } from './CharacterDetailsModal';
+import { getCharacters } from '../api';
+import type { Character } from '../types';
 
 interface AssetLibraryProps {
     projects: Project[];
@@ -20,6 +24,9 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [selectedEpisode, setSelectedEpisode] = useState<Asset | null>(null);
+    const [characters, setCharacters] = useState<Character[]>([]);
+    const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+    const [showCreateCharacter, setShowCreateCharacter] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,16 +39,30 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
     const fetchAssets = async (projectId: string) => {
         setLoading(true);
         try {
-            const data = await getProjectAssets(projectId);
-            // Ensure all keys exist
-            setAssets({
-                script: data.script || [],
-                character: data.character || [],
-                moodboard: data.moodboard || [],
-                storyboard: data.storyboard || []
-            });
+            // Fetch Assets (Script, Moodboard, Storyboard)
+            try {
+                const assetsData = await getProjectAssets(projectId);
+                setAssets({
+                    script: assetsData.script || [],
+                    character: [],
+                    moodboard: assetsData.moodboard || [],
+                    storyboard: assetsData.storyboard || []
+                });
+            } catch (err) {
+                console.error("Failed to fetch project assets:", err);
+            }
+
+            // Fetch Characters (might fail if migration not run)
+            try {
+                const charactersData = await getCharacters(projectId);
+                setCharacters(charactersData || []);
+            } catch (err) {
+                console.error("Failed to fetch characters (migration might be missing):", err);
+                setCharacters([]);
+            }
+
         } catch (err) {
-            console.error("Failed to fetch assets:", err);
+            console.error("Critical error in fetchAssets:", err);
         } finally {
             setLoading(false);
         }
@@ -128,7 +149,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                             {projects.map(p => <option key={p.id} value={p.id} className="bg-black text-white py-2">{p.name}</option>)}
                         </select>
                         <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-zinc-500">
-                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
                 </div>
@@ -153,12 +174,18 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                             </div>
 
                             <button
-                                onClick={handleUploadClick}
+                                onClick={activeTab === 'character' ? () => setShowCreateCharacter(true) : handleUploadClick}
                                 disabled={uploading}
                                 className="glass-button px-6 py-3 flex items-center gap-2 hover:bg-white text-zinc-100 hover:text-black font-bold transition-all shadow-glass rounded-xl disabled:opacity-50"
                             >
-                                {uploading ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
-                                <span>Upload to {activeTab}s</span>
+                                {uploading ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                ) : activeTab === 'character' ? (
+                                    <UserPlus size={18} />
+                                ) : (
+                                    <UploadCloud size={18} />
+                                )}
+                                <span>{activeTab === 'character' ? 'Add Character' : `Upload to ${activeTab}s`}</span>
                             </button>
                             <input
                                 type="file"
@@ -265,36 +292,41 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                     {/* Character Tab */}
                                     {activeTab === 'character' && (
                                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in">
-                                            {assets[activeTab].length === 0 ? (
+                                            {characters.length === 0 ? (
                                                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-600 border-2 border-dashed border-zinc-800/50 rounded-xl">
-                                                    <ImageIcon size={48} className="mb-4 opacity-30" />
+                                                    <User size={48} className="mb-4 opacity-30" />
                                                     <p className="text-zinc-500 font-medium">No characters found.</p>
+                                                    <button
+                                                        onClick={() => setShowCreateCharacter(true)}
+                                                        className="mt-4 text-purple-400 hover:text-purple-300 text-sm font-medium"
+                                                    >
+                                                        Create your first character
+                                                    </button>
                                                 </div>
                                             ) : (
-                                                assets[activeTab].map(asset => (
-                                                    <div key={asset.id} className="group relative bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden hover:border-white/20 transition-all hover:shadow-xl hover:-translate-y-1">
-                                                        <div className="aspect-[3/4] bg-black/30 flex items-center justify-center overflow-hidden relative">
-                                                            <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500" />
-                                                            {/* Overlay Actions */}
+                                                characters.map(char => (
+                                                    <div
+                                                        key={char.id}
+                                                        onClick={() => setSelectedCharacter(char)}
+                                                        className="group relative bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden hover:border-purple-500/50 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                                                    >
+                                                        <div className="aspect-[3/4] bg-zinc-800 flex items-center justify-center overflow-hidden relative">
+                                                            {char.images && char.images.length > 0 ? (
+                                                                <img src={char.images[0].url} alt={char.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                            ) : (
+                                                                <User size={32} className="text-zinc-600" />
+                                                            )}
+
                                                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
-                                                                <button
-                                                                    onClick={() => window.open(asset.url, '_blank')}
-                                                                    className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 hover:scale-110 transition-all"
-                                                                    title="View"
-                                                                >
-                                                                    <ImageIcon size={16} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleDelete(asset.id)}
-                                                                    className="p-2 bg-red-500/10 rounded-full text-red-400 hover:bg-red-500 hover:text-white hover:scale-110 transition-all"
-                                                                    title="Delete"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
+                                                                <span className="text-white font-medium text-sm">View Details</span>
                                                             </div>
                                                         </div>
                                                         <div className="p-3 border-t border-white/5 bg-zinc-900/80">
-                                                            <p className="text-xs font-semibold text-zinc-300 truncate font-mono" title={asset.name}>{asset.name}</p>
+                                                            <div className="flex justify-between items-start">
+                                                                <p className="text-sm font-bold text-white truncate" title={char.name}>{char.name}</p>
+                                                                <span className="text-[10px] uppercase text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded">{char.age_group}</span>
+                                                            </div>
+                                                            <p className="text-xs text-zinc-500 mt-1">{char.images?.length || 0} images</p>
                                                         </div>
                                                     </div>
                                                 ))
@@ -359,6 +391,23 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                 <MoodboardVersionsModal
                     episode={selectedEpisode}
                     onClose={() => setSelectedEpisode(null)}
+                />
+            )}
+
+            {showCreateCharacter && selectedProjectId && (
+                <CreateCharacterModal
+                    projectId={selectedProjectId}
+                    onClose={() => setShowCreateCharacter(false)}
+                    onSuccess={() => fetchAssets(selectedProjectId)}
+                />
+            )}
+
+            {selectedCharacter && selectedProjectId && (
+                <CharacterDetailsModal
+                    character={selectedCharacter}
+                    projectId={selectedProjectId}
+                    onClose={() => setSelectedCharacter(null)}
+                    onUpdate={() => fetchAssets(selectedProjectId)}
                 />
             )}
         </div>

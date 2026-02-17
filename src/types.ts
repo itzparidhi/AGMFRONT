@@ -158,3 +158,12 @@ export interface Asset {
   content?: string; // For script versions
   uploader_id?: string;
 }
+
+export interface Character {
+  id: string;
+  project_id: string;
+  name: string;
+  age_group: 'Kid' | 'Adult' | 'Senior';
+  created_at: string;
+  images: Asset[];
+}
