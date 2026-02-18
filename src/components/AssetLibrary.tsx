@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Project, Asset } from '../types';
 import { getProjectAssets, uploadAsset, deleteProjectAsset } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, Film, CheckSquare, UserPlus, User, Music, Mic, File, Monitor } from 'lucide-react';
+import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, CheckSquare, UserPlus, User, Music, Mic, File, Monitor } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 import { ScriptVersionsModal } from './ScriptVersionsModal';
 import { MoodboardVersionsModal } from './MoodboardVersionsModal';
 import { CreateCharacterModal } from './CreateCharacterModal';
 import { CharacterDetailsModal } from './CharacterDetailsModal';
 import { AudioVersionsModal } from './AudioVersionsModal';
+import { StoryboardView } from './StoryboardView';
 import { getCharacters } from '../api';
 import type { Character } from '../types';
 
@@ -180,7 +181,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                 ))}
                             </div>
 
-                            {activeTab !== 'audio' && (
+                            {activeTab !== 'audio' && activeTab !== 'storyboard' && (
                                 <button
                                     onClick={activeTab === 'character' ? () => setShowCreateCharacter(true) : handleUploadClick}
                                     disabled={uploading}
@@ -199,6 +200,11 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                             {activeTab === 'audio' && (
                                 <div className="text-zinc-500 text-sm italic pr-4">
                                     Select an episode to upload audio
+                                </div>
+                            )}
+                            {activeTab === 'storyboard' && (
+                                <div className="text-zinc-500 text-sm italic pr-4">
+                                    Navigate to a shot to upload storyboard
                                 </div>
                             )}
 
@@ -395,42 +401,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
 
                                     {/* Storyboard Tab */}
                                     {activeTab === 'storyboard' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in">
-                                            {assets.storyboard.length === 0 ? (
-                                                <div className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-600 border-2 border-dashed border-zinc-800/50 rounded-xl">
-                                                    <Film size={48} className="mb-4 opacity-30" />
-                                                    <p className="text-zinc-500 font-medium">No storyboards found.</p>
-                                                </div>
-                                            ) : (
-                                                assets.storyboard.map(asset => (
-                                                    <div key={asset.id} className="group relative bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden hover:border-white/20 transition-all hover:shadow-xl hover:-translate-y-1">
-                                                        <div className="aspect-[3/4] bg-black/30 flex items-center justify-center overflow-hidden relative">
-                                                            <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500" />
-                                                            {/* Overlay Actions */}
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
-                                                                <button
-                                                                    onClick={() => window.open(asset.url, '_blank')}
-                                                                    className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 hover:scale-110 transition-all"
-                                                                    title="View"
-                                                                >
-                                                                    <ImageIcon size={16} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleDelete(asset.id)}
-                                                                    className="p-2 bg-red-500/10 rounded-full text-red-400 hover:bg-red-500 hover:text-white hover:scale-110 transition-all"
-                                                                    title="Delete"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                        <div className="p-3 border-t border-white/5 bg-zinc-900/80">
-                                                            <p className="text-xs font-semibold text-zinc-300 truncate font-mono" title={asset.name}>{asset.name}</p>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            )}
-                                        </div>
+                                        <StoryboardView projectId={selectedProjectId} />
                                     )}
 
                                     {/* Miscellaneous Tab */}

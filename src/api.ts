@@ -445,4 +445,33 @@ export const saveTimestampReview = async (
   return response.data;
 };
 
+export const getStoryboardEpisodes = async (projectId: string) => {
+  const response = await api.get(`/storyboard/episodes/${projectId}`);
+  return response.data;
+};
+
+export const getScenes = async (episodeId: string) => {
+  const response = await api.get(`/storyboard/${episodeId}/scenes`);
+  return response.data;
+};
+
+export const getShots = async (sceneId: string) => {
+  const response = await api.get(`/storyboard/${sceneId}/shots`);
+  return response.data;
+};
+
+export const uploadStoryboardImage = async (shotId: string, file: File, uploaderId: string) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('shot_id', shotId);
+  formData.append('uploader_id', uploaderId);
+
+  const response = await api.post('/storyboard/shot/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
+};
+
 export default api;
