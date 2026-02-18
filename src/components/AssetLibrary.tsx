@@ -2,12 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Project, Asset } from '../types';
 import { getProjectAssets, uploadAsset, deleteProjectAsset } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, Film, CheckSquare, UserPlus, User } from 'lucide-react';
+import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, Film, CheckSquare, UserPlus, User, Music, Mic, File, Monitor } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 import { ScriptVersionsModal } from './ScriptVersionsModal';
 import { MoodboardVersionsModal } from './MoodboardVersionsModal';
 import { CreateCharacterModal } from './CreateCharacterModal';
 import { CharacterDetailsModal } from './CharacterDetailsModal';
+import { AudioVersionsModal } from './AudioVersionsModal';
 import { getCharacters } from '../api';
 import type { Character } from '../types';
 
@@ -19,8 +20,8 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
     const { userProfile } = useAuth();
     const dialog = useDialog();
     const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-    const [activeTab, setActiveTab] = useState<'script' | 'character' | 'moodboard' | 'storyboard'>('script');
-    const [assets, setAssets] = useState<Record<string, Asset[]>>({ script: [], character: [], moodboard: [], storyboard: [] });
+    const [activeTab, setActiveTab] = useState<'script' | 'character' | 'moodboard' | 'storyboard' | 'audio' | 'miscellaneous'>('script');
+    const [assets, setAssets] = useState<Record<string, Asset[]>>({ script: [], character: [], moodboard: [], storyboard: [], audio: [], miscellaneous: [] });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [selectedEpisode, setSelectedEpisode] = useState<Asset | null>(null);
@@ -39,14 +40,16 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
     const fetchAssets = async (projectId: string) => {
         setLoading(true);
         try {
-            // Fetch Assets (Script, Moodboard, Storyboard)
+            // Fetch Assets (Script, Moodboard, Storyboard, Audio, Miscellaneous)
             try {
                 const assetsData = await getProjectAssets(projectId);
                 setAssets({
                     script: assetsData.script || [],
                     character: [],
                     moodboard: assetsData.moodboard || [],
-                    storyboard: assetsData.storyboard || []
+                    storyboard: assetsData.storyboard || [],
+                    audio: assetsData.audio || [],
+                    miscellaneous: assetsData.miscellaneous || []
                 });
             } catch (err) {
                 console.error("Failed to fetch project assets:", err);
@@ -57,7 +60,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                 const charactersData = await getCharacters(projectId);
                 setCharacters(charactersData || []);
             } catch (err) {
-                console.error("Failed to fetch characters (migration might be missing):", err);
+                console.error("Failed to fetch characters:", err);
                 setCharacters([]);
             }
 
@@ -70,7 +73,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
 
     const handleProjectSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedProjectId(e.target.value);
-        setAssets({ script: [], character: [], moodboard: [], storyboard: [] });
+        setAssets({ script: [], character: [], moodboard: [], storyboard: [], audio: [], miscellaneous: [] });
     };
 
     const handleUploadClick = () => {
@@ -115,10 +118,14 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
             async () => {
                 try {
                     await deleteProjectAsset(assetId);
+                    // Optimistic update
                     setAssets(prev => ({
                         ...prev,
                         [activeTab]: prev[activeTab].filter(a => a.id !== assetId)
                     }));
+
+                    // Also refetch to be safe
+                    fetchAssets(selectedProjectId);
                 } catch (err) {
                     console.error("Delete failed", err);
                     dialog.alert("Error", "Failed to delete asset", 'danger');
@@ -158,8 +165,8 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {/* Tabs & Upload Action */}
                         <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                            <div className="flex gap-2 p-1 bg-black/20 rounded-lg border border-white/5">
-                                {(['script', 'character', 'moodboard', 'storyboard'] as const).map(tab => (
+                            <div className="flex flex-wrap gap-2 p-1 bg-black/20 rounded-lg border border-white/5">
+                                {(['script', 'character', 'moodboard', 'storyboard', 'audio', 'miscellaneous'] as const).map(tab => (
                                     <button
                                         key={tab}
                                         onClick={() => setActiveTab(tab)}
@@ -168,32 +175,42 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                             : 'text-zinc-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
-                                        {tab}s
+                                        {tab}
                                     </button>
                                 ))}
                             </div>
 
-                            <button
-                                onClick={activeTab === 'character' ? () => setShowCreateCharacter(true) : handleUploadClick}
-                                disabled={uploading}
-                                className="glass-button px-6 py-3 flex items-center gap-2 hover:bg-white text-zinc-100 hover:text-black font-bold transition-all shadow-glass rounded-xl disabled:opacity-50"
-                            >
-                                {uploading ? (
-                                    <Loader2 size={18} className="animate-spin" />
-                                ) : activeTab === 'character' ? (
-                                    <UserPlus size={18} />
-                                ) : (
-                                    <UploadCloud size={18} />
-                                )}
-                                <span>{activeTab === 'character' ? 'Add Character' : `Upload to ${activeTab}s`}</span>
-                            </button>
+                            {activeTab !== 'audio' && (
+                                <button
+                                    onClick={activeTab === 'character' ? () => setShowCreateCharacter(true) : handleUploadClick}
+                                    disabled={uploading}
+                                    className="glass-button px-6 py-3 flex items-center gap-2 hover:bg-white text-zinc-100 hover:text-black font-bold transition-all shadow-glass rounded-xl disabled:opacity-50"
+                                >
+                                    {uploading ? (
+                                        <Loader2 size={18} className="animate-spin" />
+                                    ) : activeTab === 'character' ? (
+                                        <UserPlus size={18} />
+                                    ) : (
+                                        <UploadCloud size={18} />
+                                    )}
+                                    <span>{activeTab === 'character' ? 'Add Character' : `Upload to ${activeTab}`}</span>
+                                </button>
+                            )}
+                            {activeTab === 'audio' && (
+                                <div className="text-zinc-500 text-sm italic pr-4">
+                                    Select an episode to upload audio
+                                </div>
+                            )}
+
                             <input
                                 type="file"
                                 multiple
                                 ref={fileInputRef}
                                 className="hidden"
                                 onChange={handleFileSelect}
-                                accept={activeTab === 'script' ? '.pdf,.doc,.docx,.txt' : 'image/*'}
+                                accept={activeTab === 'script' ? '.pdf,.doc,.docx,.txt' :
+                                    activeTab === 'audio' ? 'audio/*' :
+                                        activeTab === 'miscellaneous' ? '*/*' : 'image/*'}
                             />
                         </div>
 
@@ -289,6 +306,48 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                         </div>
                                     )}
 
+                                    {/* Audio Tab */}
+                                    {activeTab === 'audio' && (
+                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-300">
+                                            {assets.audio.map((asset) => (
+                                                <div
+                                                    key={asset.id}
+                                                    onClick={() => setSelectedEpisode(asset)}
+                                                    className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-400/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
+                                                >
+                                                    <div className="aspect-video bg-zinc-800 relative overflow-hidden">
+                                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-teal-500/20 opacity-50 group-hover:opacity-100 transition-opacity">
+                                                            <Music size={32} className="text-white drop-shadow-lg" />
+                                                        </div>
+                                                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                                                            <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{asset.episode_number ? `Episode ${asset.episode_number}` : asset.name}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4">
+                                                        <h3 className="text-white font-medium truncate group-hover:text-blue-400 transition-colors">{asset.name}</h3>
+                                                        <div className="flex items-center justify-between mt-2">
+                                                            <span className="text-xs text-zinc-500 flex items-center gap-1">
+                                                                <Music size={12} />
+                                                                Audio
+                                                            </span>
+                                                            <span className="text-xs px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20">
+                                                                View
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {assets.audio.length === 0 && (
+                                                <div className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-500">
+                                                    <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4 border border-zinc-800">
+                                                        <Music size={32} className="opacity-50" />
+                                                    </div>
+                                                    <p>No episodes found to add audio to.</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* Character Tab */}
                                     {activeTab === 'character' && (
                                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in">
@@ -337,13 +396,13 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                     {/* Storyboard Tab */}
                                     {activeTab === 'storyboard' && (
                                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in">
-                                            {assets[activeTab].length === 0 ? (
+                                            {assets.storyboard.length === 0 ? (
                                                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-600 border-2 border-dashed border-zinc-800/50 rounded-xl">
                                                     <Film size={48} className="mb-4 opacity-30" />
                                                     <p className="text-zinc-500 font-medium">No storyboards found.</p>
                                                 </div>
                                             ) : (
-                                                assets[activeTab].map(asset => (
+                                                assets.storyboard.map(asset => (
                                                     <div key={asset.id} className="group relative bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden hover:border-white/20 transition-all hover:shadow-xl hover:-translate-y-1">
                                                         <div className="aspect-[3/4] bg-black/30 flex items-center justify-center overflow-hidden relative">
                                                             <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500" />
@@ -355,6 +414,55 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                                     title="View"
                                                                 >
                                                                     <ImageIcon size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDelete(asset.id)}
+                                                                    className="p-2 bg-red-500/10 rounded-full text-red-400 hover:bg-red-500 hover:text-white hover:scale-110 transition-all"
+                                                                    title="Delete"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="p-3 border-t border-white/5 bg-zinc-900/80">
+                                                            <p className="text-xs font-semibold text-zinc-300 truncate font-mono" title={asset.name}>{asset.name}</p>
+                                                        </div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Miscellaneous Tab */}
+                                    {activeTab === 'miscellaneous' && (
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in">
+                                            {assets.miscellaneous.length === 0 ? (
+                                                <div className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-600 border-2 border-dashed border-zinc-800/50 rounded-xl">
+                                                    <File size={48} className="mb-4 opacity-30" />
+                                                    <p className="text-zinc-500 font-medium">No miscellaneous files found.</p>
+                                                </div>
+                                            ) : (
+                                                assets.miscellaneous.map(asset => (
+                                                    <div key={asset.id} className="group relative bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden hover:border-white/20 transition-all hover:shadow-xl hover:-translate-y-1">
+                                                        <div className="aspect-[3/4] bg-black/30 flex items-center justify-center overflow-hidden relative">
+                                                            {/* Preview if image, else File Icon */}
+                                                            {asset.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                                                                <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500" />
+                                                            ) : (
+                                                                <div className="flex flex-col items-center gap-2 text-zinc-500 group-hover:text-zinc-300">
+                                                                    <File size={32} />
+                                                                    <span className="text-xs uppercase font-bold">{asset.name.split('.').pop()}</span>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Overlay Actions */}
+                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                                                                <button
+                                                                    onClick={() => window.open(asset.url, '_blank')}
+                                                                    className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 hover:scale-110 transition-all"
+                                                                    title="View"
+                                                                >
+                                                                    <Monitor size={16} />
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleDelete(asset.id)}
@@ -389,6 +497,12 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
             )}
             {selectedEpisode && activeTab === 'moodboard' && (
                 <MoodboardVersionsModal
+                    episode={selectedEpisode}
+                    onClose={() => setSelectedEpisode(null)}
+                />
+            )}
+            {selectedEpisode && activeTab === 'audio' && (
+                <AudioVersionsModal
                     episode={selectedEpisode}
                     onClose={() => setSelectedEpisode(null)}
                 />

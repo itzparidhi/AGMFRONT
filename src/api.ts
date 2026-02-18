@@ -63,7 +63,7 @@ export const uploadAsset = async (payload: {
   asset_type?: string;
   resource_type?: string;
   character_name?: string;
-  asset_library_type?: 'script' | 'character' | 'moodboard' | 'storyboard';
+  asset_library_type?: 'script' | 'character' | 'moodboard' | 'storyboard' | 'audio' | 'miscellaneous';
 }, onUploadProgress?: (progressEvent: any) => void) => {
   const formData = new FormData();
   Object.entries(payload).forEach(([key, value]) => {
@@ -371,6 +371,28 @@ export const saveMoodboard = async (episodeId: string, files: File[], uploaderId
     },
   });
   return response.data;
+  return response.data;
+};
+
+export const getAudioVersions = async (episodeId: string, category: 'sfx' | 'dialogue') => {
+  const response = await api.get(`/assets/audio/${episodeId}/versions?category=${category}`);
+  return response.data;
+};
+
+export const saveAudio = async (episodeId: string, category: 'sfx' | 'dialogue', files: File[], uploaderId: string) => {
+  const formData = new FormData();
+  files.forEach((file) => {
+    formData.append('files', file);
+  });
+  formData.append('episode_id', episodeId);
+  formData.append('category', category);
+  formData.append('uploader_id', uploaderId);
+
+  const response = await api.post('/assets/audio/save', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };
 

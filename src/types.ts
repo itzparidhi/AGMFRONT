@@ -160,7 +160,7 @@ export interface ScriptVersion {
 export interface Asset {
   id: string;
   name: string;
-  type: 'script' | 'character' | 'moodboard' | 'storyboard';
+  type: 'script' | 'character' | 'moodboard' | 'storyboard' | 'audio' | 'miscellaneous';
   url: string;
   created_at: string;
   episode_number?: number; // For script type (which are episodes)
