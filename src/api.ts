@@ -445,4 +445,14 @@ export const saveTimestampReview = async (
   return response.data;
 };
 
+export const createFolder = async (name: string, projectId: string, parentFolderId?: string, uploaderId?: string) => {
+  const response = await api.post('/assets/folder/create', {
+    name,
+    project_id: projectId,
+    parent_folder_id: parentFolderId,
+    uploader_id: uploaderId
+  });
+  return response.data;
+};
+
 export default api;
