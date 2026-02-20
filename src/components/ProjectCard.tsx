@@ -13,9 +13,10 @@ interface ProjectCardProps {
   onDelete?: (projectId: string) => void;
   onRename?: (projectId: string, newName: string) => Promise<void>;
   canDelete?: boolean;
+  showDetails?: boolean;
 }
 
-export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, disabled, greenShots = 0, totalShots = 0, onDelete, onRename, canDelete = true }) => {
+export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, disabled, greenShots = 0, totalShots = 0, onDelete, onRename, canDelete = true, showDetails = true }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [password, setPassword] = useState('');
   const [deleteError, setDeleteError] = useState('');
@@ -128,7 +129,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, disa
         </div>
 
         {/* 4. Front Glass Flap (Obsidian Matte) */}
-        <div className="absolute bottom-0 w-full h-[82%] rounded-xl bg-gradient-to-br from-[#3a3a3e]/90 to-[#18181b]/95 backdrop-blur-2xl border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] flex flex-col justify-end px-3 pb-3 pt-6 overflow-hidden">
+        <div className={`absolute bottom-0 w-full h-[82%] rounded-xl bg-gradient-to-br from-[#3a3a3e]/90 to-[#18181b]/95 backdrop-blur-2xl border border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] flex flex-col ${showDetails ? 'justify-end pb-3' : 'justify-center pb-0'} px-3 pt-6 overflow-hidden`}>
 
           {/* Subtle Top Edge Highlight (Rim Light) */}
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
@@ -162,8 +163,8 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, disa
                 </button>
               </div>
             ) : (
-              <div className="relative pr-6"> {/* Add padding for the absolute button */}
-                <div className="text-sm font-medium text-white/90 tracking-wide select-none text-left leading-none break-words px-1 drop-shadow-lg transition-all line-clamp-2">
+              <div className={`relative ${showDetails ? 'pr-6' : ''}`}> {/* Add padding for the absolute button only if showing details (edit button) */}
+                <div className={`text-sm font-medium text-white/90 tracking-wide select-none ${showDetails ? 'text-left' : 'text-center'} leading-none break-words px-1 drop-shadow-lg transition-all line-clamp-2`}>
                   {project.name}
                 </div>
                 {onRename && (
@@ -183,31 +184,35 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, disa
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full mt-1 px-1 relative z-10 transition-all duration-300">
-            <div className="flex justify-between items-end mb-1">
-              <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-widest">Progress</span>
-              <span className={`text-[9px] font-mono font-bold ${percentage === 100 ? 'text-green-400' : 'text-zinc-500'}`}>
-                {percentage}%
-              </span>
+          {showDetails && (
+            <div className="w-full mt-1 px-1 relative z-10 transition-all duration-300">
+              <div className="flex justify-between items-end mb-1">
+                <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-widest">Progress</span>
+                <span className={`text-[9px] font-mono font-bold ${percentage === 100 ? 'text-green-400' : 'text-zinc-500'}`}>
+                  {percentage}%
+                </span>
+              </div>
+              <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full shadow-[0_0_10px_rgba(34,197,94,0.3)] transition-all duration-1000 ease-out ${percentage === 100 ? 'bg-green-400' : 'bg-green-600'}`}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
             </div>
-            <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full shadow-[0_0_10px_rgba(34,197,94,0.3)] transition-all duration-1000 ease-out ${percentage === 100 ? 'bg-green-400' : 'bg-green-600'}`}
-                style={{ width: `${percentage}%` }}
-              />
-            </div>
-          </div>
+          )}
           {/* Glossy Sweep Effect on Hover */}
           <div className="absolute -inset-10 bg-gradient-to-tr from-transparent via-white/5 to-transparent rotate-45 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         </div>
       </div>
 
       {/* External Label (Date Only) */}
-      <div className="text-center mt-4">
-        <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-          Created: {new Date(project.created_at).toLocaleDateString()}
-        </p>
-      </div>
+      {showDetails && (
+        <div className="text-center mt-4">
+          <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
+            Created: {new Date(project.created_at).toLocaleDateString()}
+          </p>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal - Rendered via Portal */}
       {showDeleteConfirm && createPortal(

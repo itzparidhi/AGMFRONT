@@ -60,7 +60,7 @@ export const MoodboardUploadModal: React.FC<MoodboardUploadModalProps> = ({ epis
                 {/* Header */}
                 <div className="flex items-center justify-between p-4 border-b border-white/10 bg-black/20">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-500/10 rounded-lg text-purple-400">
+                        <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400">
                             <ImageIcon size={20} />
                         </div>
                         <div>
@@ -77,7 +77,7 @@ export const MoodboardUploadModal: React.FC<MoodboardUploadModalProps> = ({ epis
                 <div className="p-6 overflow-y-auto">
                     <div className="space-y-6">
                         {/* Dropzone */}
-                        <div className="border-2 border-dashed border-zinc-700 hover:border-purple-500/50 rounded-xl p-8 transition-colors bg-black/20 group relative">
+                        <div className="border-2 border-dashed border-zinc-700 hover:border-blue-500/50 rounded-xl p-8 transition-colors bg-black/20 group relative">
                             <input
                                 type="file"
                                 onChange={handleFileChange}
@@ -86,11 +86,11 @@ export const MoodboardUploadModal: React.FC<MoodboardUploadModalProps> = ({ epis
                                 multiple
                             />
                             <div className="flex flex-col items-center justify-center text-center gap-3">
-                                <div className="w-12 h-12 bg-zinc-800 text-zinc-400 group-hover:text-purple-400 group-hover:bg-purple-500/10 rounded-full flex items-center justify-center transition-colors">
+                                <div className="w-12 h-12 bg-zinc-800 text-zinc-400 group-hover:text-blue-400 group-hover:bg-blue-500/10 rounded-full flex items-center justify-center transition-colors">
                                     <UploadCloud size={24} />
                                 </div>
                                 <div>
-                                    <p className="text-zinc-300 font-medium group-hover:text-purple-300 transition-colors">Click or drag images here</p>
+                                    <p className="text-zinc-300 font-medium group-hover:text-blue-300 transition-colors">Click or drag images here</p>
                                     <p className="text-xs text-zinc-500 mt-1">PNG, JPG, WEBP</p>
                                 </div>
                             </div>
@@ -126,7 +126,7 @@ export const MoodboardUploadModal: React.FC<MoodboardUploadModalProps> = ({ epis
                     <button
                         onClick={handleUpload}
                         disabled={files.length === 0 || uploading}
-                        className="px-6 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors shadow-lg shadow-purple-500/10 flex items-center gap-2"
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors shadow-lg shadow-blue-500/10 flex items-center gap-2"
                     >
                         {uploading ? (
                             <>

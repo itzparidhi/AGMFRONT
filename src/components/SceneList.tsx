@@ -45,6 +45,7 @@ interface ShotCardProps {
   onDelete: (e: React.MouseEvent) => void;
   isDeleteEnabled: boolean;
   sceneId: string;
+  shotIndex: number;
 }
 
 const SortableShotCard: React.FC<ShotCardProps> = ({
@@ -54,6 +55,7 @@ const SortableShotCard: React.FC<ShotCardProps> = ({
   onDelete,
   isDeleteEnabled,
   sceneId,
+  shotIndex,
 }) => {
   const [isDragMode, setIsDragMode] = React.useState(false);
   const clickTimeoutRef = React.useRef<number | null>(null);
@@ -156,7 +158,7 @@ const SortableShotCard: React.FC<ShotCardProps> = ({
           `}
         ></div>
         <span className={`text-sm font-medium truncate px-2 shot-text transition-opacity duration-300 ${shot.imageUrl ? 'group-hover:opacity-0' : ''}`}>
-          {shot.name}
+          {`Shot_${shotIndex}`}
         </span>
 
         {/* Hover Image Background */}
@@ -271,6 +273,14 @@ export const SceneList: React.FC<SceneListProps> = ({ projectId, episodeId }) =>
       .in('shot_id', shotIds)
       .order('version_number', { ascending: false });
 
+    // Fetch generations (for fallback images)
+    const { data: generationsData } = await supabase
+      .from('generations')
+      .select('*')
+      .in('shot_id', shotIds)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false });
+
     const shotsWithStatus: ShotWithStatus[] = activeShots.map(shot => {
       const shotVersions = (versionsData?.filter(v => v.shot_id === shot.id) || []).sort((a, b) => b.version_number - a.version_number);
       const activeVersion = shotVersions.find(v => v.is_active);
@@ -285,7 +295,8 @@ export const SceneList: React.FC<SceneListProps> = ({ projectId, episodeId }) =>
 
         if (r?.cd_vote === true) {
           color = 'green';
-          imageUrl = activeVersion.gdrive_link;
+          // Fallback to public_link if gdrive_link is missing
+          imageUrl = activeVersion.gdrive_link || activeVersion.public_link;
         }
         else if (r?.cd_vote === false || r?.pm_vote === false) color = 'red';
         else color = 'yellow';
@@ -293,7 +304,19 @@ export const SceneList: React.FC<SceneListProps> = ({ projectId, episodeId }) =>
 
       // If not approved (green), show latest version image
       if (color !== 'green' && latestVersion) {
-        imageUrl = latestVersion.gdrive_link || latestVersion.public_link;
+         if (latestVersion.gdrive_link) {
+            imageUrl = latestVersion.gdrive_link;
+         } else if (latestVersion.media_type === 'image') {
+            imageUrl = latestVersion.public_link || null;
+         }
+      }
+
+      // Fallback to Generation Image if no version image is available (e.g. video version without thumbnail)
+      if (!imageUrl) {
+          const latestGen = generationsData?.find(g => g.shot_id === shot.id);
+          if (latestGen) {
+              imageUrl = latestGen.image_url;
+          }
       }
 
       return { ...shot, statusColor: color, imageUrl };
@@ -645,7 +668,7 @@ export const SceneList: React.FC<SceneListProps> = ({ projectId, episodeId }) =>
               strategy={horizontalListSortingStrategy}
             >
               <div className="flex flex-wrap gap-4 items-center">
-                {shotsByScene[scene.id]?.map(shot => (
+                {shotsByScene[scene.id]?.map((shot, index) => (
                   <SortableShotCard
                     key={shot.id}
                     shot={shot}
@@ -654,6 +677,7 @@ export const SceneList: React.FC<SceneListProps> = ({ projectId, episodeId }) =>
                     onDelete={(e) => handleSoftDelete(e, shot.id, scene.id)}
                     isDeleteEnabled={userProfile?.role === 'CD' || userProfile?.role === 'PM'}
                     sceneId={scene.id}
+                    shotIndex={index + 1}
                   />
                 ))}
 

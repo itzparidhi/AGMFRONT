@@ -5,10 +5,11 @@ import {
     getShots,
     uploadStoryboardImage,
     createStructure,
-    createStructureWithSequence
+    createStructureWithSequence,
+    renumberScenes
 } from '../api';
 import type { Episode, Scene, Shot } from '../types';
-import { Loader2, Plus, Image as ImageIcon, ChevronRight, UploadCloud, Film, Video } from 'lucide-react';
+import { Loader2, Plus, Image as ImageIcon, ChevronRight, UploadCloud, Film, Video, RefreshCcw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useDialog } from '../context/DialogContext';
 
@@ -104,23 +105,40 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
         }
     };
 
+    const [isRenumbering, setIsRenumbering] = useState(false);
+
     const handleAddScene = async () => {
         if (!selectedEpisode) return;
 
-        const name = prompt("Enter Scene Name (e.g., Scene 1)");
-        if (!name) return;
+        const sceneName = `Scene_${scenes.length + 1}`;
 
         try {
             await createStructure({
-                name,
+                name: sceneName,
                 type: 'scene',
                 parentDbId: selectedEpisode.id,
                 parentFolderId: selectedEpisode.gdrive_folder_id
             });
+            await handleRenumberScenes(); // Ensure consistency after creation
             fetchScenes(selectedEpisode.id);
         } catch (err) {
             console.error("Failed to create scene", err);
             dialog.alert("Error", "Failed to create scene", 'danger');
+        }
+    };
+
+    const handleRenumberScenes = async () => {
+        if (!selectedEpisode) return;
+
+        setIsRenumbering(true);
+        try {
+            await renumberScenes(selectedEpisode.id);
+            fetchScenes(selectedEpisode.id);
+        } catch (err) {
+            console.error("Failed to renumber scenes", err);
+            dialog.alert("Error", "Failed to renumber scenes", 'danger');
+        } finally {
+            setIsRenumbering(false);
         }
     };
 
@@ -257,23 +275,39 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
         return (
             <div className="animate-in fade-in duration-300">
                 {loadingEpisodes ? (
-                    <div className="flex justify-center p-12"><Loader2 className="animate-spin text-purple-500" /></div>
+                    <div className="flex justify-center p-12"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                         {episodes.map(ep => (
                             <div
                                 key={ep.id}
                                 onClick={() => setSelectedEpisode(ep)}
-                                className="bg-zinc-900 border border-white/5 rounded-xl p-6 hover:border-purple-500/50 hover:bg-zinc-800/80 transition-all cursor-pointer group flex flex-col items-center justify-center gap-3 aspect-square"
+                                className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
                             >
-                                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
-                                    <Film size={24} />
+                                <div className="aspect-video bg-zinc-800 relative overflow-hidden">
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <Film size={32} className="text-zinc-600" />
+                                    </div>
+                                    
+                                    {/* Hover Overlay */}
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                        <span className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase">
+                                            Open
+                                        </span>
+                                    </div>
+
+                                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">Episode {ep.episode_number || '1'}</p>
+                                    </div>
                                 </div>
-                                <div className="text-center">
-                                    <h3 className="font-bold text-white group-hover:text-purple-400 transition-colors">
-                                        {ep.name || `Episode ${ep.episode_number}`}
-                                    </h3>
-                                    <p className="text-xs text-zinc-500 mt-1">Select to view scenes</p>
+                                <div className="p-4">
+                                    <h3 className="text-white font-medium truncate group-hover:text-blue-400 transition-colors">{ep.name || `Episode ${ep.episode_number}`}</h3>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <span className="text-xs text-zinc-500 flex items-center gap-1">
+                                            <Film size={12} />
+                                            Select to view
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -296,38 +330,64 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
 
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-white">Scenes in {selectedEpisode.name}</h2>
-                    <button
-                        onClick={handleAddScene}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg text-white font-medium text-sm transition-colors"
-                    >
-                        <Plus size={16} /> Add Scene
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleRenumberScenes}
+                            disabled={isRenumbering || loadingScenes}
+                            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-white font-medium text-sm transition-colors border border-white/10"
+                            title="Renumber scenes to Scene_1, Scene_2, etc."
+                        >
+                            <RefreshCcw size={16} className={isRenumbering ? 'animate-spin' : ''} />
+                            {isRenumbering ? 'Fix Naming' : 'Fix Naming'}
+                        </button>
+                        <button
+                            onClick={handleAddScene}
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-medium text-sm transition-colors"
+                        >
+                            <Plus size={16} /> Add Scene
+                        </button>
+                    </div>
                 </div>
 
                 {loadingScenes ? (
-                    <div className="flex justify-center p-12"><Loader2 className="animate-spin text-purple-500" /></div>
+                    <div className="flex justify-center p-12"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {scenes.map(scene => (
                             <div
                                 key={scene.id}
                                 onClick={() => setSelectedScene(scene)}
-                                className="bg-zinc-900 border border-white/5 rounded-xl p-5 hover:border-blue-500/50 hover:bg-zinc-800/80 transition-all cursor-pointer group"
+                                className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
                             >
-                                <div className="flex justify-between items-start mb-3">
-                                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
-                                        <Video size={20} />
+                                <div className="aspect-video bg-zinc-800 relative overflow-hidden">
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <Video size={32} className="text-zinc-600" />
                                     </div>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${scene.status === 'complete' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                        'bg-zinc-800 text-zinc-400 border-zinc-700'
-                                        }`}>
-                                        {scene.status}
-                                    </span>
+
+                                    {/* Hover Overlay */}
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                        <span className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase">
+                                            Open
+                                        </span>
+                                    </div>
+
+                                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                                        <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${scene.status === 'complete' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                                            'bg-zinc-500/20 text-zinc-300 border-zinc-500/30'
+                                            }`}>
+                                            {scene.status}
+                                        </span>
+                                    </div>
                                 </div>
-                                <h3 className="font-bold text-white group-hover:text-blue-400 transition-colors truncate">
-                                    {scene.name}
-                                </h3>
-                                <p className="text-xs text-zinc-500 mt-1">View Shots</p>
+                                <div className="p-4">
+                                    <h3 className="text-white font-medium truncate group-hover:text-blue-400 transition-colors">{scene.name}</h3>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <span className="text-xs text-zinc-500 flex items-center gap-1">
+                                            <Video size={12} />
+                                            View Shots
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                         {scenes.length === 0 && (
@@ -361,7 +421,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
                     <button
                         onClick={handleAddShot}
                         disabled={isBulkUploading}
-                        className="flex items-center gap-2 px-4 py-2 bg-pink-600 hover:bg-pink-500 rounded-lg text-white font-medium text-sm transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-medium text-sm transition-colors"
                     >
                         <Plus size={16} /> Add Shot
                     </button>
@@ -377,11 +437,11 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
             </div>
 
             {loadingShots ? (
-                <div className="flex justify-center p-12"><Loader2 className="animate-spin text-purple-500" /></div>
+                <div className="flex justify-center p-12"><Loader2 className="animate-spin text-blue-500" /></div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                     {shots.map((shot, index) => (
-                        <div key={shot.id} className="group relative bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-pink-500/50 transition-all shadow-lg hover:shadow-pink-500/10">
+                        <div key={shot.id} className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all shadow-lg hover:shadow-blue-500/10 group">
                             {/* Sequence Badge */}
                             <div className="absolute top-2 left-2 z-10 bg-black/60 backdrop-blur px-2 py-1 rounded text-xs font-mono text-white border border-white/10">
                                 #{index + 1}
@@ -402,10 +462,10 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
                                     </div>
                                 )}
 
-                                /* Upload Overlay */
+                                {/* Upload Overlay */}
                                 <label className="absolute inset-0 bg-black/60 opacity-0 group-hover/image:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 cursor-pointer backdrop-blur-[2px]">
                                     {uploadingShotId === shot.id ? (
-                                        <Loader2 className="animate-spin text-pink-400" />
+                                        <Loader2 className="animate-spin text-blue-400" />
                                     ) : (
                                         <>
                                             <UploadCloud className="text-white mb-1" />
@@ -425,8 +485,8 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
                             </div>
 
                             {/* Details */}
-                            <div className="p-3 bg-zinc-950/50 border-t border-white/5">
-                                <h4 className="font-bold text-sm text-white truncate" title={shot.name}>{shot.name}</h4>
+                            <div className="p-4">
+                                <h3 className="text-white font-medium truncate group-hover:text-blue-400 transition-colors">{shot.name}</h3>
                             </div>
                         </div>
                     ))}

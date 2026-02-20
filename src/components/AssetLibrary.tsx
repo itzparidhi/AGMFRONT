@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Project, Asset } from '../types';
 import { getProjectAssets, uploadAsset, deleteProjectAsset, createFolder } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, CheckSquare, UserPlus, User, Music, File, Monitor, FolderPlus, ArrowLeft, Folder } from 'lucide-react';
+import { Loader2, UploadCloud, FileText, Image as ImageIcon, CheckSquare, UserPlus, User, Music, File, FolderPlus, ArrowLeft } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 import { ScriptVersionsModal } from './ScriptVersionsModal';
 import { MoodboardVersionsModal } from './MoodboardVersionsModal';
@@ -229,8 +229,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                 {!selectedProjectId && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                          <div className="flex items-center gap-2 mb-6 text-zinc-400">
-                            <Folder size={18} />
-                            <span className="font-semibold text-white">Select Project</span>
+                            <span className="font-semibold text-white">Select Project :</span>
                             <span className="text-zinc-600">to view {activeTab}</span>
                          </div>
                          
@@ -242,6 +241,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                     onClick={() => handleProjectSelect(project)}
                                     // Disable other features not needed here like rename/delete if needed, or keep them
                                     canDelete={false} 
+                                    showDetails={false}
                                 />
                             ))}
                             {projects.length === 0 && (
@@ -378,7 +378,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                 <>
                                     {/* Script Tab */}
                                     {activeTab === 'script' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-300">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 animate-in fade-in duration-300">
                                             {assets.script.map((asset) => (
                                                 <div
                                                     key={asset.id}
@@ -386,10 +386,18 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                     className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
                                                 >
                                                     <div className="aspect-video bg-zinc-800 relative overflow-hidden">
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-purple-500/20 opacity-50 group-hover:opacity-100 transition-opacity">
-                                                            <FileText size={32} className="text-white drop-shadow-lg" />
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <FileText size={32} className="text-zinc-600" />
                                                         </div>
-                                                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+
+                                                        {/* Hover Overlay */}
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                                            <span className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase">
+                                                                View
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                                                             <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{asset.episode_number ? `Episode ${asset.episode_number}` : asset.name}</p>
                                                         </div>
                                                     </div>
@@ -399,9 +407,6 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                             <span className="text-xs text-zinc-500 flex items-center gap-1">
                                                                 <FileText size={12} />
                                                                 Script
-                                                            </span>
-                                                            <span className="text-xs px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20">
-                                                                View
                                                             </span>
                                                         </div>
                                                     </div>
@@ -420,30 +425,35 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
 
                                     {/* Moodboard Tab */}
                                     {activeTab === 'moodboard' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-300">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 animate-in fade-in duration-300">
                                             {assets.moodboard.map((asset) => (
                                                 <div
                                                     key={asset.id}
                                                     onClick={() => setSelectedEpisode(asset)}
-                                                    className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-purple-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-purple-500/10"
+                                                    className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
                                                 >
                                                     <div className="aspect-video bg-zinc-800 relative overflow-hidden">
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-500/20 to-blue-500/20 opacity-50 group-hover:opacity-100 transition-opacity">
-                                                            <ImageIcon size={32} className="text-white drop-shadow-lg" />
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <ImageIcon size={32} className="text-zinc-600" />
                                                         </div>
-                                                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                                                        
+                                                        {/* Hover Overlay */}
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                                            <span className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase">
+                                                                View
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                                                             <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{asset.episode_number ? `Episode ${asset.episode_number}` : asset.name}</p>
                                                         </div>
                                                     </div>
                                                     <div className="p-4">
-                                                        <h3 className="text-white font-medium truncate group-hover:text-purple-400 transition-colors">{asset.name}</h3>
+                                                        <h3 className="text-white font-medium truncate group-hover:text-blue-400 transition-colors">{asset.name}</h3>
                                                         <div className="flex items-center justify-between mt-2">
                                                             <span className="text-xs text-zinc-500 flex items-center gap-1">
                                                                 <ImageIcon size={12} />
                                                                 Moodboard
-                                                            </span>
-                                                            <span className="text-xs px-2 py-0.5 bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20">
-                                                                View
                                                             </span>
                                                         </div>
                                                     </div>
@@ -462,7 +472,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
 
                                     {/* Audio Tab */}
                                     {activeTab === 'audio' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-in fade-in duration-300">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 animate-in fade-in duration-300">
                                             {assets.audio.map((asset) => (
                                                 <div
                                                     key={asset.id}
@@ -470,10 +480,18 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                     className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-400/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
                                                 >
                                                     <div className="aspect-video bg-zinc-800 relative overflow-hidden">
-                                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-teal-500/20 opacity-50 group-hover:opacity-100 transition-opacity">
-                                                            <Music size={32} className="text-white drop-shadow-lg" />
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <Music size={32} className="text-zinc-600" />
                                                         </div>
-                                                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+
+                                                        {/* Hover Overlay */}
+                                                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                                            <span className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase">
+                                                                View
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
                                                             <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{asset.episode_number ? `Episode ${asset.episode_number}` : asset.name}</p>
                                                         </div>
                                                     </div>
@@ -483,9 +501,6 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                             <span className="text-xs text-zinc-500 flex items-center gap-1">
                                                                 <Music size={12} />
                                                                 Audio
-                                                            </span>
-                                                            <span className="text-xs px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded-full border border-blue-500/20">
-                                                                View
                                                             </span>
                                                         </div>
                                                     </div>
@@ -504,7 +519,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
 
                                     {/* Character Tab */}
                                     {activeTab === 'character' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 animate-in fade-in">
                                             {characters.length === 0 ? (
                                                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-zinc-600 border-2 border-dashed border-zinc-800/50 rounded-xl">
                                                     <User size={48} className="mb-4 opacity-30" />
@@ -521,25 +536,36 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                     <div
                                                         key={char.id}
                                                         onClick={() => setSelectedCharacter(char)}
-                                                        className="group relative bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden hover:border-purple-500/50 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                                                        className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
                                                     >
-                                                        <div className="aspect-[3/4] bg-zinc-800 flex items-center justify-center overflow-hidden relative">
+                                                        <div className="aspect-video bg-zinc-800 relative overflow-hidden">
                                                             {char.images && char.images.length > 0 ? (
-                                                                <img src={char.images[0].url} alt={char.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                                                <img src={char.images[0].url} alt={char.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                                             ) : (
-                                                                <User size={32} className="text-zinc-600" />
+                                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                                    <User size={32} className="text-zinc-600" />
+                                                                </div>
                                                             )}
 
-                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
-                                                                <span className="text-white font-medium text-sm">View Details</span>
+                                                            {/* Hover Overlay */}
+                                                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                                                                <span className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase">
+                                                                    View
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                                                                <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{char.age_group || 'Character'}</p>
                                                             </div>
                                                         </div>
-                                                        <div className="p-3 border-t border-white/5 bg-zinc-900/80">
-                                                            <div className="flex justify-between items-start">
-                                                                <p className="text-sm font-bold text-white truncate" title={char.name}>{char.name}</p>
-                                                                <span className="text-[10px] uppercase text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded">{char.age_group}</span>
+                                                        <div className="p-4">
+                                                            <h3 className="text-white font-medium truncate group-hover:text-blue-400 transition-colors">{char.name}</h3>
+                                                            <div className="flex items-center justify-between mt-2">
+                                                                <span className="text-xs text-zinc-500 flex items-center gap-1">
+                                                                    <ImageIcon size={12} />
+                                                                    {char.images?.length || 0} images
+                                                                </span>
                                                             </div>
-                                                            <p className="text-xs text-zinc-500 mt-1">{char.images?.length || 0} images</p>
                                                         </div>
                                                     </div>
                                                 ))
@@ -554,7 +580,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
 
                                     {/* Miscellaneous Tab */}
                                     {activeTab === 'miscellaneous' && (
-                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 animate-in fade-in">
+                                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 animate-in fade-in">
                                             {(() => {
                                                 const items = getCurrentMiscItems();
                                                 const folders = items.filter(i => i.type === 'folder');
@@ -598,38 +624,51 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                         ))}
                                                         
                                                         {files.map(asset => (
-                                                            <div key={asset.id} className="group relative bg-zinc-900/50 rounded-lg border border-white/5 overflow-hidden hover:border-white/20 transition-all hover:shadow-xl hover:-translate-y-1">
-                                                                <div className="aspect-[3/4] bg-black/30 flex items-center justify-center overflow-hidden relative">
+                                                            <div
+                                                                key={asset.id}
+                                                                className="bg-zinc-900 border border-white/5 rounded-xl overflow-hidden hover:border-blue-500/50 transition-all cursor-pointer group hover:shadow-lg hover:shadow-blue-500/10"
+                                                            >
+                                                                <div className="aspect-video bg-zinc-800 relative overflow-hidden">
                                                                     {/* Preview if image, else File Icon */}
                                                                     {asset.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
-                                                                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500" />
+                                                                        <img src={asset.url} alt={asset.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                                                                     ) : (
-                                                                        <div className="flex flex-col items-center gap-2 text-zinc-500 group-hover:text-zinc-300">
-                                                                            <File size={32} />
-                                                                            <span className="text-xs uppercase font-bold">{asset.name.split('.').pop()}</span>
+                                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                                            <div className="flex flex-col items-center gap-2 text-zinc-600">
+                                                                                <File size={32} />
+                                                                                <span className="text-xs uppercase font-bold">{asset.name.split('.').pop()}</span>
+                                                                            </div>
                                                                         </div>
                                                                     )}
 
-                                                                    {/* Overlay Actions */}
-                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                                                                    {/* Hover Overlay */}
+                                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
                                                                         <button
                                                                             onClick={() => window.open(asset.url, '_blank')}
-                                                                            className="p-2 bg-white/10 rounded-full text-white hover:bg-white/20 hover:scale-110 transition-all"
-                                                                            title="View"
+                                                                            className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase hover:bg-blue-500/30 transition-colors"
                                                                         >
-                                                                            {asset.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? <ImageIcon size={16} /> : <Monitor size={16} />}
+                                                                            View
                                                                         </button>
                                                                         <button
                                                                             onClick={() => handleDelete(asset.id)}
-                                                                            className="p-2 bg-red-500/10 rounded-full text-red-400 hover:bg-red-500 hover:text-white hover:scale-110 transition-all"
-                                                                            title="Delete"
+                                                                            className="px-4 py-2 bg-red-500/10 text-red-400 rounded-full border border-red-500/20 font-medium text-xs tracking-wide uppercase hover:bg-red-500/20 transition-colors"
                                                                         >
-                                                                            <Trash2 size={16} />
+                                                                            Delete
                                                                         </button>
                                                                     </div>
+
+                                                                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
+                                                                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider truncate">{asset.name}</p>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="p-3 border-t border-white/5 bg-zinc-900/80">
-                                                                    <p className="text-xs font-semibold text-zinc-300 truncate font-mono" title={asset.name}>{asset.name}</p>
+                                                                <div className="p-4">
+                                                                    <h3 className="text-white font-medium truncate group-hover:text-blue-400 transition-colors">{asset.name}</h3>
+                                                                    <div className="flex items-center justify-between mt-2">
+                                                                        <span className="text-xs text-zinc-500 flex items-center gap-1">
+                                                                            {asset.name.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? <ImageIcon size={12} /> : <File size={12} />}
+                                                                            File
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         ))}

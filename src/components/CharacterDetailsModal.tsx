@@ -77,7 +77,7 @@ export const CharacterDetailsModal: React.FC<CharacterDetailsModalProps> = ({ ch
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-white/10 bg-black/20">
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-purple-500/10 rounded-full text-purple-400 border border-purple-500/20">
+                        <div className="p-3 text-blue-400">
                             <User size={32} />
                         </div>
                         <div>

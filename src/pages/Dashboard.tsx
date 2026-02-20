@@ -225,6 +225,7 @@ export const Dashboard: React.FC = () => {
                   totalShots={projectStats[project.id]?.total || 0}
                   onDelete={handleDeleteProject}
                   onRename={userProfile?.role === 'CD' ? handleRenameProject : undefined}
+                  showDetails={true}
                 />
               ))
             )}

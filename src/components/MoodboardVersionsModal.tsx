@@ -61,7 +61,7 @@ export const MoodboardVersionsModal: React.FC<MoodboardVersionsModalProps> = ({ 
                 <div className="flex items-center justify-between p-6 border-b border-white/10">
                     <div>
                         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <ImageIcon className="text-purple-400" />
+                            <ImageIcon className="text-blue-400" />
                             {episode.name}
                         </h2>
                         <p className="text-zinc-500 text-sm mt-1">Moodboard History</p>
@@ -82,7 +82,7 @@ export const MoodboardVersionsModal: React.FC<MoodboardVersionsModalProps> = ({ 
                             <p className="mb-4">No moodboards uploaded yet.</p>
                             <button
                                 onClick={() => setIsUploading(true)}
-                                className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-colors font-medium flex items-center gap-2 mx-auto"
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors font-medium flex items-center gap-2 mx-auto"
                             >
                                 <Plus size={16} />
                                 Upload First Version
@@ -92,7 +92,7 @@ export const MoodboardVersionsModal: React.FC<MoodboardVersionsModalProps> = ({ 
                         <div className="space-y-8">
                             <button
                                 onClick={() => setIsUploading(true)}
-                                className="w-full py-3 border-2 border-dashed border-zinc-700 hover:border-purple-500/50 hover:bg-purple-500/5 text-zinc-400 hover:text-purple-400 rounded-lg transition-all flex items-center justify-center gap-2 mb-6"
+                                className="w-full py-3 border-2 border-dashed border-zinc-700 hover:border-blue-500/50 hover:bg-blue-500/5 text-zinc-400 hover:text-blue-400 rounded-lg transition-all flex items-center justify-center gap-2 mb-6"
                             >
                                 <Plus size={18} />
                                 <span className="font-medium">Upload New Version</span>
@@ -101,7 +101,7 @@ export const MoodboardVersionsModal: React.FC<MoodboardVersionsModalProps> = ({ 
                             {versions.map((version) => (
                                 <div key={version.version_number} className="space-y-4">
                                     <div className="flex items-center gap-3 border-b border-white/5 pb-2">
-                                        <div className="px-2 py-1 bg-purple-500/10 text-purple-400 rounded-md text-sm font-bold border border-purple-500/20">
+                                        <div className="px-2 py-1 bg-blue-500/10 text-blue-400 rounded-md text-sm font-bold border border-blue-500/20">
                                             v{version.version_number}
                                         </div>
                                         <div className="text-xs text-zinc-500 flex items-center gap-2">

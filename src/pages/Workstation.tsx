@@ -145,7 +145,7 @@ export const Workstation: React.FC = () => {
         query = query.eq('assigned_pe_id', userProfile.id);
       }
 
-      const { data } = await query.order('name', { ascending: true });
+      const { data } = await query.order('sequence', { ascending: true });
 
       if (data) {
         setSceneShots(data);
@@ -1030,7 +1030,7 @@ export const Workstation: React.FC = () => {
         <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
           {/* Center: Shot Name and Version */}
           <h2 className="text-xl font-bold text-center flex-1">
-            {shot.name} - {activeVersion ? `v${activeVersion.version_number}` : 'No Version'}
+            {`Shot_${currentShotIndex + 1}`} - {activeVersion ? `v${activeVersion.version_number}` : 'No Version'}
           </h2>
 
           {/* Right: Drive Link and Uploader Info */}
@@ -1091,6 +1091,7 @@ export const Workstation: React.FC = () => {
               <button
                 key={v.id}
                 onMouseEnter={(e) => {
+                  if (workstationMode === 'video') return;
                   const rect = e.currentTarget.getBoundingClientRect();
                   setHoveredVersion({ v, x: rect.right + 10, y: rect.top });
                 }}
@@ -1101,7 +1102,7 @@ export const Workstation: React.FC = () => {
                   ${activeVersion?.id === v.id ? 'border-white-500 bg-white-900/20 text-white' : 'border-zinc-700 bg-zinc-800 text-zinc-500 hover:border-zinc-500'}
                 `}
               >
-                {workstationMode === 'video' && <Film size={10} className="mr-0.5 opacity-60" />}
+                {/* {workstationMode === 'video' && <Film size={10} className="mr-0.5 opacity-60" />} */}
                 v{v.version_number}
               </button>
             ))}

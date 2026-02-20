@@ -470,6 +470,11 @@ export const getShots = async (sceneId: string) => {
   return response.data;
 };
 
+export const renumberScenes = async (episodeId: string) => {
+  const response = await api.post('/structure/scenes/renumber', { episode_id: episodeId });
+  return response.data;
+};
+
 export const uploadStoryboardImage = async (shotId: string, file: File, uploaderId: string) => {
   const formData = new FormData();
   formData.append('file', file);
