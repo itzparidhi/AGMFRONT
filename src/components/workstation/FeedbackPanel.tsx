@@ -404,13 +404,13 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                                 <div className='flex gap-2'>
                                                                     <button
                                                                         onClick={() => pmFileInputRef.current?.click()}
-                                                                        className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500"
+                                                                        className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded-full border border-zinc-700 hover:border-zinc-500"
                                                                     >
                                                                         <ImageIcon size={12} /> Upload
                                                                     </button>
                                                                     <button
                                                                         onClick={() => startAnnotation('pm')}
-                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded border border-purple-800 hover:border-purple-600"
+                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
                                                                     >
                                                                         <PenTool size={12} /> Annotate
                                                                     </button>
@@ -685,13 +685,13 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                                 <div className='flex gap-2'>
                                                                     <button
                                                                         onClick={() => cdFileInputRef.current?.click()}
-                                                                        className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded border border-zinc-700 hover:border-zinc-500"
+                                                                        className="text-[10px] uppercase font-bold text-zinc-400 hover:text-white flex items-center gap-1 transition-colors bg-zinc-800 px-2 py-1 rounded-full border border-zinc-700 hover:border-zinc-500"
                                                                     >
                                                                         <ImageIcon size={12} /> Upload
                                                                     </button>
                                                                     <button
                                                                         onClick={() => startAnnotation('cd')}
-                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded border border-purple-800 hover:border-purple-600"
+                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
                                                                     >
                                                                         <PenTool size={12} /> Annotate
                                                                     </button>

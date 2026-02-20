@@ -161,13 +161,14 @@ export interface ScriptVersion {
 export interface Asset {
   id: string;
   name: string;
-  type: 'script' | 'character' | 'moodboard' | 'storyboard' | 'audio' | 'miscellaneous';
+  type: 'script' | 'character' | 'moodboard' | 'storyboard' | 'audio' | 'miscellaneous' | 'folder';
   url: string;
   created_at: string;
   episode_number?: number; // For script type (which are episodes)
   version_number?: number; // For script versions
   content?: string; // For script versions
   uploader_id?: string;
+  folder_id?: string; // For nested folders in miscellaneous
 }
 
 export interface Character {

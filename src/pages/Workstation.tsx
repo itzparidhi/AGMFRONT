@@ -1,6 +1,6 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Loader2, X, ChevronLeft, ChevronRight, ImageIcon, Film } from 'lucide-react';
+import { Sparkles, Loader2, X, ChevronLeft, ChevronRight, ImageIcon, Film, ArrowLeft } from 'lucide-react';
 import { ImageViewerModal } from '../components/ImageViewerModal';
 import { useWorkstation } from '../hooks/useWorkstation';
 import { generateImage, fetchGenerations, saveTimestampReview } from '../api';
@@ -984,6 +984,16 @@ export const Workstation: React.FC = () => {
 
       {/* Col 2: Canvas (Flex-1 to take available space) */}
       <div className="flex-1 min-w-0 border-r border-zinc-700 p-4 flex flex-col relative transition-all duration-300">
+        {/* Back to Image Mode button - only visible in video mode */}
+        {workstationMode === 'video' && (
+          <button
+            onClick={() => setWorkstationMode('image')}
+            className="mb-2 text-zinc-400 hover:text-white flex items-center gap-2 transition-colors self-start"
+          >
+            <ArrowLeft size={20} /> Back
+          </button>
+        )}
+
         {/* Image / Video Toggle */}
         <div className="flex items-center justify-center gap-1 mb-3">
           <button
@@ -1014,6 +1024,8 @@ export const Workstation: React.FC = () => {
             <Film size={14} /> Dub
           </button>
         </div>
+
+
 
         <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
           {/* Center: Shot Name and Version */}
