@@ -62,7 +62,7 @@ export interface Version {
   gdrive_file_id: string | null;
   gdrive_link: string | null;
   public_link?: string; // Supabase Storage Link
-  media_type?: 'image' | 'video';
+  media_type?: 'image' | 'video' | 'dub';
   is_active: boolean;
   created_at: string;
   users?: {
@@ -104,6 +104,7 @@ export interface Generation {
 
 export interface TimestampComment {
   time: number;
+  endTime?: number;
   comment: string;
 }
 

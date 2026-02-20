@@ -23,8 +23,8 @@ export const Workstation: React.FC = () => {
   const navigate = useNavigate();
   const dialog = useDialog();
 
-  // Workstation Mode: Image or Video
-  const [workstationMode, setWorkstationMode] = useState<'image' | 'video'>('image');
+  // Workstation Mode: Image or Video or Dub
+  const [workstationMode, setWorkstationMode] = useState<'image' | 'video' | 'dub'>('image');
   const [currentVideoTime, setCurrentVideoTime] = useState(0);
 
   // AI Generation State
@@ -69,6 +69,17 @@ export const Workstation: React.FC = () => {
 
   // Selected Background for Auto Mode
   const [selectedBackgroundUrl, setSelectedBackgroundUrl] = useState<string | null>(null);
+
+  // Video Player Ref for seeking
+  const videoPlayerRef = useRef<HTMLVideoElement>(null);
+
+  const handleSeek = (time: number) => {
+    if (videoPlayerRef.current) {
+      videoPlayerRef.current.currentTime = time;
+      // Optional: Play if paused?
+      // videoPlayerRef.current.play();
+    }
+  };
 
   // HOISTED HOOK
   const {
@@ -986,12 +997,21 @@ export const Workstation: React.FC = () => {
           </button>
           <button
             onClick={() => setWorkstationMode('video')}
-            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-r-full text-xs font-bold uppercase tracking-wider transition-all ${workstationMode === 'video'
+            className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${workstationMode === 'video'
               ? 'bg-white text-black shadow-lg'
               : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
               }`}
           >
             <Film size={14} /> Video
+          </button>
+          <button
+            onClick={() => setWorkstationMode('dub')}
+            className={`flex items-center gap-1.5 px-4 py-1.5 rounded-r-full text-xs font-bold uppercase tracking-wider transition-all ${workstationMode === 'dub'
+              ? 'bg-white text-black shadow-lg'
+              : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200'
+              }`}
+          >
+            <Film size={14} /> Dub
           </button>
         </div>
 
@@ -1080,6 +1100,7 @@ export const Workstation: React.FC = () => {
 
           {/* Main Player */}
           <MainPlayer
+            ref={videoPlayerRef}
             selectedGeneration={selectedGeneration}
             activeVersion={activeVersion}
             setFullScreenImage={setFullScreenImage}
@@ -1118,8 +1139,8 @@ export const Workstation: React.FC = () => {
                   type="file"
                   ref={customUploadRef}
                   className="hidden"
-                  onChange={handleUpload}
-                  accept={workstationMode === 'video' ? 'video/*' : 'image/*'}
+                  onChange={(e) => handleUpload(e, workstationMode)}
+                  accept={workstationMode === 'image' ? 'image/*' : 'video/*'}
                 />
                 <button
                   onClick={handleApprovalClick}
@@ -1241,6 +1262,7 @@ export const Workstation: React.FC = () => {
         workstationMode={workstationMode}
         onSaveTimestamps={handleSaveTimestamps}
         currentVideoTime={currentVideoTime}
+        onTimestampClick={handleSeek}
       />
     </div >
   );

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import { useRef, forwardRef, useImperativeHandle } from 'react';
 import { Maximize, Film } from 'lucide-react';
 import { DriveImage } from '../DriveImage';
 import type { Generation, Version } from '../../types';
@@ -8,19 +8,21 @@ interface MainPlayerProps {
     activeVersion: Version | null;
     setFullScreenImage: (url: string | null) => void;
     setZoomLevel: (level: number) => void;
-    workstationMode: 'image' | 'video';
+    workstationMode: 'image' | 'video' | 'dub';
     onTimeUpdate?: (time: number) => void;
 }
 
-export const MainPlayer: React.FC<MainPlayerProps> = ({
+export const MainPlayer = forwardRef<HTMLVideoElement, MainPlayerProps>(({
     selectedGeneration,
     activeVersion,
     setFullScreenImage,
     setZoomLevel,
     workstationMode,
     onTimeUpdate,
-}) => {
-    const videoRef = useRef<HTMLVideoElement>(null);
+}, ref) => {
+    const internalVideoRef = useRef<HTMLVideoElement>(null);
+
+    useImperativeHandle(ref, () => internalVideoRef.current as HTMLVideoElement);
 
     const handleFullScreen = (url: string | null) => {
         if (url) {
@@ -29,7 +31,7 @@ export const MainPlayer: React.FC<MainPlayerProps> = ({
         }
     };
 
-    const isVideoMode = workstationMode === 'video';
+    const isVideoMode = workstationMode === 'video' || workstationMode === 'dub';
     const versionUrl = activeVersion?.public_link || activeVersion?.gdrive_link;
 
     return (
@@ -77,7 +79,7 @@ export const MainPlayer: React.FC<MainPlayerProps> = ({
             ) : isVideoMode && activeVersion && versionUrl ? (
                 /* Video mode: show video player */
                 <video
-                    ref={videoRef}
+                    ref={internalVideoRef}
                     src={versionUrl}
                     controls
                     className="max-w-full max-h-full object-contain"
@@ -96,4 +98,6 @@ export const MainPlayer: React.FC<MainPlayerProps> = ({
             )}
         </div>
     );
-};
+});
+
+MainPlayer.displayName = 'MainPlayer';

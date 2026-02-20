@@ -114,7 +114,7 @@ export const useWorkstation = () => {
     }
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>, mediaType?: 'image' | 'video' | 'dub') => {
     if (!e.target.files || !e.target.files[0] || !shot || !userProfile) return;
 
     const file = e.target.files[0];
@@ -129,7 +129,8 @@ export const useWorkstation = () => {
         folder_id: shot.gdrive_folder_id,
         db_id: shot.id,
         uploader_id: userProfile.id,
-        is_storyboard: false
+        is_storyboard: false,
+        asset_type: mediaType // Pass media type (e.g., 'dub', 'video', 'image')
       }, (progressEvent) => {
         const total = progressEvent.total || progressEvent.loaded;
         const percentCompleted = Math.round((progressEvent.loaded * 100) / total);

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { Project, Asset } from '../types';
 import { getProjectAssets, uploadAsset, deleteProjectAsset } from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, Film, CheckSquare, UserPlus, User, Music, Mic, File, Monitor } from 'lucide-react';
+import { Loader2, UploadCloud, Trash2, FileText, Image as ImageIcon, Film, CheckSquare, UserPlus, User, Music, File, Monitor } from 'lucide-react';
 import { useDialog } from '../context/DialogContext';
 import { ScriptVersionsModal } from './ScriptVersionsModal';
 import { MoodboardVersionsModal } from './MoodboardVersionsModal';
