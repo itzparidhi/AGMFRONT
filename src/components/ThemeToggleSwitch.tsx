@@ -20,7 +20,7 @@ export const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={() => setIsDark(!isDark)}
-      className="p-2 rounded-full hover:bg-white/10 transition-colors text-yellow-400 dark:text-purple-300"
+      className="p-2 rounded-full hover:bg-white/10 transition-colors text-yellow-400 dark:text-blue-300"
       title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
     >
       {isDark ? <Sun size={20} className="drop-shadow-glow" /> : <Moon size={20} />}

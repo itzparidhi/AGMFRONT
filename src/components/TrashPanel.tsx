@@ -242,7 +242,7 @@ export const TrashPanel: React.FC<TrashPanelProps> = ({ onProjectRestored }) => 
                                                 <div className="flex items-center gap-2 overflow-hidden">
                                                     {item.type === 'project' && <Folder className="text-blue-500 shrink-0" size={16} />}
                                                     {item.type === 'episode' && <Clapperboard className="text-yellow-500 shrink-0" size={16} />}
-                                                    {item.type === 'scene' && <Film className="text-purple-500 shrink-0" size={16} />}
+                                                    {item.type === 'scene' && <Film className="text-blue-500 shrink-0" size={16} />}
                                                     {item.type === 'shot' && <Image className="text-green-500 shrink-0" size={16} />}
                                                     
                                                     <div className="min-w-0">

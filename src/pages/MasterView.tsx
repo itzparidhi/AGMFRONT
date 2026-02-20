@@ -267,7 +267,7 @@ export const MasterView: React.FC = () => {
         </div>
         {isMasterCD && (
           <div className="flex items-center gap-4 text-sm">
-            <span className="px-3 py-1 bg-purple-900/50 text-purple-300 rounded-full border border-purple-700">
+            <span className="px-3 py-1 bg-blue-900/50 text-blue-300 rounded-full border border-blue-700">
               Master CD
             </span>
             <span className="text-zinc-400">
@@ -396,7 +396,7 @@ export const MasterView: React.FC = () => {
                   value={rejectComment}
                   onChange={(e) => setRejectComment(e.target.value)}
                   placeholder="Explain what needs to be changed..."
-                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-500 focus:outline-none focus:border-purple-500 resize-none"
+                  className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder:text-zinc-500 focus:outline-none focus:border-blue-500 resize-none"
                   rows={4}
                 />
               </div>
@@ -423,7 +423,7 @@ export const MasterView: React.FC = () => {
 
                   <button
                     onClick={() => setIsAnnotating(true)}
-                    className="flex-1 px-3 py-2 bg-purple-900/30 hover:bg-purple-900/50 border border-purple-800 rounded-lg text-purple-300 flex items-center justify-center gap-2 transition-colors"
+                    className="flex-1 px-3 py-2 bg-blue-900/30 hover:bg-blue-900/50 border border-blue-800 rounded-lg text-blue-300 flex items-center justify-center gap-2 transition-colors"
                   >
                     <PenTool size={16} />
                     Annotate Shot
@@ -448,9 +448,9 @@ export const MasterView: React.FC = () => {
 
                   {/* Annotation Previews */}
                   {rejectAnnotations.map((file, i) => (
-                    <div key={`anno-${i}`} className="relative group w-24 h-24 bg-black rounded-lg overflow-hidden border border-purple-500">
+                    <div key={`anno-${i}`} className="relative group w-24 h-24 bg-black rounded-lg overflow-hidden border border-blue-500">
                       <img src={URL.createObjectURL(file)} alt="Annotation" className="w-full h-full object-cover" />
-                      <div className="absolute bottom-0 w-full bg-purple-900/80 text-[10px] text-center py-1 text-white font-bold">ANNOTATION</div>
+                      <div className="absolute bottom-0 w-full bg-blue-900/80 text-[10px] text-center py-1 text-white font-bold">ANNOTATION</div>
                       <button
                         onClick={() => removeRejectFile(i, true)}
                         className="absolute top-0 right-0 p-1 bg-red-600 text-white rounded-bl opacity-0 group-hover:opacity-100 transition-opacity"

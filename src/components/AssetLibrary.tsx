@@ -281,7 +281,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                 {activeTab === 'miscellaneous' && (
                                     <button
                                         onClick={handleCreateFolder}
-                                        className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all"
+                                        className="glass-button !h-9 !px-4 flex items-center gap-2"
                                     >
                                         <FolderPlus size={16} />
                                         <span className="text-sm font-medium">New Folder</span>
@@ -293,16 +293,16 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                         <button
                                             onClick={activeTab === 'character' ? () => setShowCreateCharacter(true) : handleUploadClick}
                                             disabled={uploading}
-                                            className="glass-button px-6 py-2 flex items-center gap-2 hover:bg-white text-zinc-100 hover:text-black font-bold transition-all shadow-glass rounded-xl disabled:opacity-50"
+                                            className="glass-button !h-9 !px-4 flex items-center gap-2 disabled:opacity-50"
                                         >
                                             {uploading ? (
-                                                <Loader2 size={18} className="animate-spin" />
+                                                <Loader2 size={16} className="animate-spin" />
                                             ) : activeTab === 'character' ? (
-                                                <UserPlus size={18} />
+                                                <UserPlus size={16} />
                                             ) : (
-                                                <UploadCloud size={18} />
+                                                <UploadCloud size={16} />
                                             )}
-                                            <span>{activeTab === 'character' ? 'Add Character' : 'Upload'}</span>
+                                            <span className="text-sm font-medium">{activeTab === 'character' ? 'Add Character' : 'Upload'}</span>
                                         </button>
                                         
                                         <input
@@ -526,7 +526,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                     <p className="text-zinc-500 font-medium">No characters found.</p>
                                                     <button
                                                         onClick={() => setShowCreateCharacter(true)}
-                                                        className="mt-4 text-purple-400 hover:text-purple-300 text-sm font-medium"
+                                                        className="mt-4 text-blue-400 hover:text-blue-300 text-sm font-medium"
                                                     >
                                                         Create your first character
                                                     </button>
@@ -594,14 +594,14 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                             <div className="flex gap-4 mt-4">
                                                                 <button
                                                                     onClick={handleCreateFolder}
-                                                                    className="text-purple-400 hover:text-purple-300 text-sm font-medium hover:underline"
+                                                                    className="text-blue-400 hover:text-blue-300 text-sm font-medium hover:underline"
                                                                 >
                                                                     Create new folder
                                                                 </button>
                                                                 <span className="text-zinc-600">or</span>
                                                                 <button
                                                                     onClick={handleUploadClick}
-                                                                    className="text-purple-400 hover:text-purple-300 text-sm font-medium hover:underline"
+                                                                    className="text-blue-400 hover:text-blue-300 text-sm font-medium hover:underline"
                                                                 >
                                                                     Upload files
                                                                 </button>

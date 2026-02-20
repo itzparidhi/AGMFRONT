@@ -53,7 +53,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             variant === 'danger' ? 'bg-gradient-to-r from-red-500 to-orange-500' :
             variant === 'success' ? 'bg-gradient-to-r from-green-500 to-teal-500' :
             variant === 'warning' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
-            'bg-gradient-to-r from-blue-500 to-purple-500'
+            'bg-gradient-to-r from-blue-500 to-cyan-500'
         }`}></div>
 
         <button 

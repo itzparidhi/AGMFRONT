@@ -334,7 +334,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
                         <button
                             onClick={handleRenumberScenes}
                             disabled={isRenumbering || loadingScenes}
-                            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-white font-medium text-sm transition-colors border border-white/10"
+                            className="glass-button flex items-center gap-2 !px-6 !py-2 !text-sm"
                             title="Renumber scenes to Scene_1, Scene_2, etc."
                         >
                             <RefreshCcw size={16} className={isRenumbering ? 'animate-spin' : ''} />
@@ -342,7 +342,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
                         </button>
                         <button
                             onClick={handleAddScene}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-medium text-sm transition-colors"
+                            className="glass-button flex items-center gap-2 !px-6 !py-2 !text-sm"
                         >
                             <Plus size={16} /> Add Scene
                         </button>
@@ -413,7 +413,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
                     <button
                         onClick={handleBulkUploadClick}
                         disabled={isBulkUploading}
-                        className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-white font-medium text-sm transition-colors border border-white/10"
+                        className="glass-button flex items-center gap-2 !px-6 !py-2 !text-sm"
                     >
                         {isBulkUploading ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
                         {isBulkUploading ? 'Uploading...' : 'Bulk Upload'}
@@ -421,7 +421,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({ projectId }) => 
                     <button
                         onClick={handleAddShot}
                         disabled={isBulkUploading}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-medium text-sm transition-colors"
+                        className="glass-button flex items-center gap-2 !px-6 !py-2 !text-sm"
                     >
                         <Plus size={16} /> Add Shot
                     </button>

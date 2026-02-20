@@ -46,8 +46,8 @@ export const BackgroundGridResultsModal: React.FC<BackgroundGridResultsModalProp
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-purple-500/20 rounded-lg">
-                            <Grid className="text-purple-400" size={24} />
+                        <div className="p-2 bg-blue-500/20 rounded-lg">
+                            <Grid className="text-blue-400" size={24} />
                         </div>
                         <div>
                             <h2 className="text-xl font-bold text-white">Background Grid Results</h2>
@@ -68,7 +68,7 @@ export const BackgroundGridResultsModal: React.FC<BackgroundGridResultsModalProp
                                 <div key={index}
                                     className={`
                                         relative aspect-square group rounded-xl overflow-hidden cursor-pointer border-2 transition-all
-                                        ${isSelected ? 'border-purple-500 ring-2 ring-purple-500/30' : 'border-transparent hover:border-white/20'}
+                                        ${isSelected ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-transparent hover:border-white/20'}
                                     `}
                                     onClick={() => toggleSelection(index)}
                                 >
@@ -76,7 +76,7 @@ export const BackgroundGridResultsModal: React.FC<BackgroundGridResultsModalProp
 
                                     {/* Overlay */}
                                     <div className={`absolute inset-0 bg-black/40 transition-opacity flex items-center justify-center ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                                        {isSelected && <Check className="text-purple-400 w-10 h-10 drop-shadow-md" strokeWidth={3} />}
+                                        {isSelected && <Check className="text-blue-400 w-10 h-10 drop-shadow-md" strokeWidth={3} />}
                                     </div>
 
                                     {/* Action Buttons */}
@@ -108,7 +108,7 @@ export const BackgroundGridResultsModal: React.FC<BackgroundGridResultsModalProp
                     <button
                         onClick={handleSave}
                         disabled={selectedIndexes.length === 0}
-                        className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-purple-900/20"
+                        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-bold text-sm flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20"
                     >
                         <Plus size={16} />
                         Add to References

@@ -251,7 +251,7 @@ export const ImageAnnotationModal: React.FC<ImageAnnotationModalProps> = ({
                 {/* Header */}
                 <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900 rounded-t-xl z-10">
                     <h3 className="font-bold flex items-center gap-2 text-xl text-zinc-100">
-                        <PenTool size={20} className="text-purple-500" />
+                        <PenTool size={20} className="text-blue-500" />
                         Annotate Image
                     </h3>
                     <div className="flex gap-2 items-center">
@@ -286,7 +286,7 @@ export const ImageAnnotationModal: React.FC<ImageAnnotationModalProps> = ({
 
                         <button
                             onClick={handleSave}
-                            className="flex items-center gap-2 px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold shadow-sm transition-colors"
+                            className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-sm transition-colors"
                         >
                             <Save size={18} /> Save
                         </button>
@@ -305,7 +305,7 @@ export const ImageAnnotationModal: React.FC<ImageAnnotationModalProps> = ({
                     <div className="flex bg-zinc-800 rounded-lg p-1 border border-zinc-700 shadow-sm">
                         <button
                             onClick={() => setTool('pen')}
-                            className={`p-2 rounded ${tool === 'pen' ? 'bg-purple-900/50 text-purple-300' : 'text-zinc-400 hover:text-zinc-100'}`}
+                            className={`p-2 rounded ${tool === 'pen' ? 'bg-blue-900/50 text-blue-300' : 'text-zinc-400 hover:text-zinc-100'}`}
                             title="Pen"
                         >
                             <PenTool size={20} />
@@ -318,7 +318,7 @@ export const ImageAnnotationModal: React.FC<ImageAnnotationModalProps> = ({
                             <button
                                 key={c}
                                 onClick={() => { setColor(c); setTool('pen'); }}
-                                className={`w-6 h-6 rounded-full border shadow-sm ${color === c && tool === 'pen' ? 'border-zinc-400 ring-2 ring-purple-400 ring-offset-2' : 'border-zinc-600 hover:scale-110'}`}
+                                className={`w-6 h-6 rounded-full border shadow-sm ${color === c && tool === 'pen' ? 'border-zinc-400 ring-2 ring-blue-400 ring-offset-2' : 'border-zinc-600 hover:scale-110'}`}
                                 style={{ backgroundColor: c }}
                                 title={c}
                             />
@@ -334,7 +334,7 @@ export const ImageAnnotationModal: React.FC<ImageAnnotationModalProps> = ({
                             max="20"
                             value={lineWidth}
                             onChange={(e) => setLineWidth(parseInt(e.target.value))}
-                            className="w-32 h-1.5 bg-zinc-600 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                            className="w-32 h-1.5 bg-zinc-600 rounded-lg appearance-none cursor-pointer accent-blue-600"
                         />
                         <span className="text-xs font-mono text-zinc-400 w-4">{lineWidth}</span>
                     </div>

@@ -257,7 +257,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                 key={`pm-${review.id}`}
                                                 ref={pmCommentRef}
                                                 defaultValue={review.pm_comment || ''}
-                                                className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-2 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500/50 resize-y"
+                                                className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-2 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 resize-y"
                                                 placeholder={userProfile?.role === 'PM' ? "Write review..." : "No review yet."}
                                                 disabled={userProfile?.role !== 'PM'}
                                             />
@@ -410,7 +410,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                                     </button>
                                                                     <button
                                                                         onClick={() => startAnnotation('pm')}
-                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
+                                                                        className="text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors bg-blue-900/30 px-2 py-1 rounded-full border border-blue-800 hover:border-blue-600"
                                                                     >
                                                                         <PenTool size={12} /> Annotate
                                                                     </button>
@@ -454,9 +454,9 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
 
                                                             {/* New Annotations */}
                                                             {pmAnnotationFiles.map((file, i) => (
-                                                                <div key={`new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50">
+                                                                <div key={`new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-blue-500/50">
                                                                     <img src={URL.createObjectURL(file)} alt="New annotation" className="w-full h-full object-cover" />
-                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-blue-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
                                                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                                                                         <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
                                                                         <button onClick={() => removeFile('pm', i, true)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
@@ -469,9 +469,9 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                                 ...(review.pm_annotation_urls || []),
                                                                 ...(review.pm_annotation_url ? [review.pm_annotation_url] : [])
                                                             ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
-                                                                <div key={`saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50 opacity-80">
+                                                                <div key={`saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-blue-500/50 opacity-80">
                                                                     <img src={url} alt="Saved annotation" className="w-full h-full object-cover" />
-                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-blue-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
                                                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                                         <button onClick={() => setViewImage({ url, prompt: 'PM Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
                                                                     </div>
@@ -540,7 +540,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                 key={`cd-${review.id}`}
                                                 ref={cdCommentRef}
                                                 defaultValue={review.cd_comment || ''}
-                                                className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-2 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500/50 resize-y"
+                                                className="w-full bg-black/40 text-zinc-200 p-3 rounded-lg border border-white/10 mb-2 min-h-24 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 resize-y"
                                                 placeholder={userProfile?.role === 'CD' ? "Write review..." : "No review yet."}
                                                 disabled={userProfile?.role !== 'CD'}
                                             />
@@ -691,7 +691,7 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                                     </button>
                                                                     <button
                                                                         onClick={() => startAnnotation('cd')}
-                                                                        className="text-[10px] uppercase font-bold text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors bg-purple-900/30 px-2 py-1 rounded-full border border-purple-800 hover:border-purple-600"
+                                                                        className="text-[10px] uppercase font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors bg-blue-900/30 px-2 py-1 rounded-full border border-blue-800 hover:border-blue-600"
                                                                     >
                                                                         <PenTool size={12} /> Annotate
                                                                     </button>
@@ -736,9 +736,9 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
 
                                                             {/* New Annotations */}
                                                             {cdAnnotationFiles.map((file, i) => (
-                                                                <div key={`cd-new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50">
+                                                                <div key={`cd-new-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-blue-500/50">
                                                                     <img src={URL.createObjectURL(file)} alt="New annotation" className="w-full h-full object-cover" />
-                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-blue-600/80 text-white text-[8px] text-center font-bold px-1">NEW ANNO</div>
                                                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                                                                         <button onClick={() => setViewImage({ url: URL.createObjectURL(file), prompt: 'Preview Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
                                                                         <button onClick={() => removeFile('cd', i, true)} className="p-1 bg-red-600 text-white rounded-full"><X size={10} /></button>
@@ -751,9 +751,9 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                                 ...(review.cd_annotation_urls || []),
                                                                 ...(review.cd_annotation_url ? [review.cd_annotation_url] : [])
                                                             ].filter((url, index, self) => self.indexOf(url) === index).map((url, i) => (
-                                                                <div key={`cd-saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50 opacity-80">
+                                                                <div key={`cd-saved-anno-${i}`} className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-blue-500/50 opacity-80">
                                                                     <img src={url} alt="Saved annotation" className="w-full h-full object-cover" />
-                                                                    <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
+                                                                    <div className="absolute bottom-0 inset-x-0 bg-blue-600/80 text-white text-[8px] text-center font-bold px-1">ANNO</div>
                                                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                                                         <button onClick={() => setViewImage({ url, prompt: 'CD Annotation' })} className="p-1 bg-zinc-800 text-white rounded-full"><Maximize2 size={10} /></button>
                                                                     </div>
@@ -785,9 +785,9 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
 
                                 {/* Master CD Card - Read Only */}
                                 {(review.master_cd_vote !== null && review.master_cd_vote !== undefined) && (
-                                    <div className="p-4 bg-zinc-900 rounded border border-purple-700/50">
+                                    <div className="p-4 bg-zinc-900 rounded border border-blue-700/50">
                                         <div className="flex items-center justify-between mb-3">
-                                            <h3 className="font-bold text-purple-300">Master CD Review</h3>
+                                            <h3 className="font-bold text-blue-300">Master CD Review</h3>
                                             <span className={`text-xs px-2 py-0.5 rounded-full ${review.master_cd_vote ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'}`}>
                                                 {review.master_cd_vote ? 'Approved & Synced' : 'Rejected'}
                                             </span>
@@ -828,13 +828,13 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                                     {review.master_cd_annotation_url && (
                                                         <div>
                                                             <h4 className="text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest">Annotation</h4>
-                                                            <div className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-purple-500/50">
+                                                            <div className="relative group w-24 h-24 bg-black/50 rounded-lg overflow-hidden border border-blue-500/50">
                                                                 <img
                                                                     src={review.master_cd_annotation_url}
                                                                     alt="Master CD Annotation"
                                                                     className="w-full h-full object-cover"
                                                                 />
-                                                                <div className="absolute bottom-0 inset-x-0 bg-purple-600/80 text-white text-[9px] text-center font-bold px-1">
+                                                                <div className="absolute bottom-0 inset-x-0 bg-blue-600/80 text-white text-[9px] text-center font-bold px-1">
                                                                     ANNOTATION
                                                                 </div>
                                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

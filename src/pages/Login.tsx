@@ -37,7 +37,7 @@ export const Login: React.FC = () => {
 //     <div className="flex items-center justify-center h-screen bg-zinc-950 text-zinc-100 relative overflow-hidden">
 //       {/* Background gradients */}
 //       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-//         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-900/20 rounded-full blur-[120px]"></div>
+//         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-900/20 rounded-full blur-[120px]"></div>
 //         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-900/20 rounded-full blur-[120px]"></div>
 //       </div>
 
@@ -56,7 +56,7 @@ export const Login: React.FC = () => {
 //               type="email"
 //               value={email}
 //               onChange={(e) => setEmail(e.target.value)}
-//               className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 focus:outline-none transition-all placeholder-zinc-600 text-white shadow-inner"
+//               className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:outline-none transition-all placeholder-zinc-600 text-white shadow-inner"
 //               placeholder="name@example.com"
 //               required
 //             />
@@ -67,7 +67,7 @@ export const Login: React.FC = () => {
 //               type="password"
 //               value={password}
 //               onChange={(e) => setPassword(e.target.value)}
-//               className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 focus:outline-none transition-all placeholder-zinc-600 text-white shadow-inner"
+//               className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:outline-none transition-all placeholder-zinc-600 text-white shadow-inner"
 //               placeholder="••••••••"
 //               required
 //             />
@@ -75,7 +75,7 @@ export const Login: React.FC = () => {
 //           <button
 //             type="submit"
 //             disabled={loading}
-//             className="w-full px-4 py-3.5 font-bold text-white glass-button rounded-xl shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all active:scale-[0.98] uppercase tracking-wide text-sm"
+//             className="w-full px-4 py-3.5 font-bold text-white glass-button rounded-xl shadow-lg hover:shadow-blue-500/25 disabled:opacity-50 disabled:cursor-not-allowed transform transition-all active:scale-[0.98] uppercase tracking-wide text-sm"
 //           >
 //             {loading ? 'Signing in...' : 'Sign In'}
 //           </button>

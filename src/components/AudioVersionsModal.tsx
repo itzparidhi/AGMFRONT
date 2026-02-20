@@ -76,7 +76,7 @@ export const AudioVersionsModal: React.FC<AudioVersionsModalProps> = ({ episode,
                 <div className="flex items-center justify-between p-6 border-b border-white/10 bg-zinc-900/50">
                     <div>
                         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            {activeCategory === 'sfx' ? <Music className="text-blue-400" /> : <Mic className="text-purple-400" />}
+                            {activeCategory === 'sfx' ? <Music className="text-blue-400" /> : <Mic className="text-blue-400" />}
                             {episode.name}
                         </h2>
                         <p className="text-zinc-500 text-sm mt-1">Audio Library • {activeCategory === 'sfx' ? 'Sound Effects' : 'Dialogues'}</p>
@@ -101,7 +101,7 @@ export const AudioVersionsModal: React.FC<AudioVersionsModalProps> = ({ episode,
                         <button
                             onClick={() => setActiveCategory('dialogue')}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeCategory === 'dialogue'
-                                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50'
+                                ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50'
                                 : 'text-zinc-400 hover:text-white hover:bg-white/5'}`}
                         >
                             <Mic size={16} />
