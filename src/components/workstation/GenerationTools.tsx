@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Wand2, Sparkles, Loader2, ImagePlus, X, ChevronDown, Star, User, Upload, Target, Image as ImageIcon } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Wand2, Sparkles, Loader2, ImagePlus, X, ChevronDown, Star, User, Upload, Target, Image as ImageIcon, Plus } from 'lucide-react';
 import { DriveImage } from '../DriveImage';
 import type { Shot } from '../../types';
 import { CharacterSelectionModal } from './CharacterSelectionModal';
@@ -739,40 +739,40 @@ export const GenerationTools: React.FC<GenerationToolsProps> = ({
                                 </div>
                             </button>
 
-                            {/* Selected Characters Display */}
-                            {selectedCharacters.map((character) => (
-                                <div
-                                    key={character.id}
-                                    className="w-24 h-24 rounded-xl border-2 border-blue-500 bg-zinc-800 flex flex-col justify-between items-start text-left p-2 relative overflow-hidden group transition-all shrink-0"
-                                >
-                                    {/* Character Image */}
-                                    <img
-                                        src={getPreviewUrl(character.gdrive_link)}
-                                        alt={character.name}
-                                        className="absolute inset-0 w-full h-full object-cover opacity-40"
-                                        onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                        }}
-                                    />
-                                    {/* Remove Button */}
-                                    <button
-                                        onClick={() => removeCharacter(character.id)}
-                                        className="absolute top-1 right-1 bg-red-500 rounded-full p-1 hover:bg-red-600 z-20"
+                            <div className="flex flex-wrap gap-2">
+                                {selectedCharacters.map((char: any) => (
+                                    <div
+                                        key={char.id}
+                                        className="group relative flex items-center gap-2 bg-zinc-800 pl-1 pr-3 py-1 rounded-full border border-zinc-700 hover:border-zinc-500 transition-colors"
                                     >
-                                        <X size={12} className="text-white" />
-                                    </button>
-
-
-                                    {/* Character Name */}
-                                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm p-1 z-10">
-                                        <span className="text-[9px] font-bold text-white truncate block">
-                                            {character.name}
+                                        <div className="w-6 h-6 rounded-full bg-zinc-700 overflow-hidden">
+                                            {getPreviewUrl(char.gdrive_link) && (
+                                                <img
+                                                    src={getPreviewUrl(char.gdrive_link)}
+                                                    alt={char.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-zinc-300 max-w-[100px] truncate">
+                                            {char.name} <span className="text-zinc-500">({char.selectedAgeGroup || char.default_age_group || 'Adult'})</span>
                                         </span>
+                                        <button
+                                            onClick={() => removeCharacter(char.id)}
+                                            className="p-0.5 hover:bg-red-500/20 hover:text-red-400 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                                        >
+                                            <X size={12} />
+                                        </button>
                                     </div>
-
-                                </div>
-
-                            ))}
+                                ))}
+                                <button
+                                    onClick={() => setShowCharacterModal(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-600/20 hover:border-blue-600/40 transition-all text-xs font-medium"
+                                >
+                                    <Plus size={12} />
+                                    Add Character
+                                </button>
+                            </div>
 
                             {/* Manual Character Tabs */}
                             {characterTabs.map((tab) => (

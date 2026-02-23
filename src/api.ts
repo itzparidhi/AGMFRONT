@@ -411,7 +411,13 @@ export const createCharacter = async (name: string, ageGroup: string, projectId:
   return response.data;
 };
 
-export const saveCharacterImages = async (characterId: string, files: File[], projectId: string, uploaderId: string) => {
+export const saveCharacterImages = async (
+  files: File[],
+  characterId: string,
+  projectId: string,
+  uploaderId: string,
+  ageGroup: string
+): Promise<any> => {
   const formData = new FormData();
   files.forEach((file) => {
     formData.append('files', file);
@@ -419,6 +425,7 @@ export const saveCharacterImages = async (characterId: string, files: File[], pr
   formData.append('character_id', characterId);
   formData.append('project_id', projectId);
   formData.append('uploader_id', uploaderId);
+  formData.append('age_group', ageGroup);
 
   const response = await api.post('/characters/save_images', formData, {
     headers: {

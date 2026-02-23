@@ -171,11 +171,24 @@ export interface Asset {
   folder_id?: string; // For nested folders in miscellaneous
 }
 
+export interface CharacterVersion {
+  id: string;
+  name: string;
+  version_number: number;
+  content: 'Kid' | 'Adult' | 'Senior'; // Age Group
+  images: Asset[];
+  created_at?: string;
+}
+
 export interface Character {
   id: string;
   project_id: string;
   name: string;
-  age_group: 'Kid' | 'Adult' | 'Senior';
+  // age_group: 'Kid' | 'Adult' | 'Senior'; // Legacy
+  default_age_group: string;
   created_at: string;
-  images: Asset[];
+  images?: Asset[]; // Legacy
+  age_groups?: {
+    [key: string]: CharacterVersion[];
+  };
 }
