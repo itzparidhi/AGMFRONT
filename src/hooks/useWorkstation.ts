@@ -39,15 +39,27 @@ export const useWorkstation = () => {
 
   // 2. Handle Realtime Updates for Reviews
   useEffect(() => {
-    if (!shotId) return;
+    if (!shotId || !activeVersion?.id) return;
 
+    const versionId = activeVersion.id;
+    const channelName = `reviews:version:${versionId}`;
     const subscription = supabase
-      .channel('public:reviews')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'reviews' }, (payload) => {
-        if (activeVersion && payload.new && (payload.new as Review).version_id === activeVersion.id) {
-          setReview(payload.new as Review);
+      .channel(channelName)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reviews',
+          filter: `version_id=eq.${versionId}`
+        },
+        (payload) => {
+          // Client-side guard for extra safety
+          if (payload.new && (payload.new as Review).version_id === versionId) {
+            setReview(payload.new as Review);
+          }
         }
-      })
+      )
       .subscribe();
 
     return () => { supabase.removeChannel(subscription); };
