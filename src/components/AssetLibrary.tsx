@@ -85,7 +85,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
         setSelectedProjectId(project.id);
         setAssets({ script: [], character: [], moodboard: [], storyboard: [], audio: [], miscellaneous: [] });
     };
-    
+
 
 
     const handleUploadClick = () => {
@@ -93,7 +93,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
             fileInputRef.current.click();
         }
     };
-    
+
     const handleCreateFolder = async () => {
         if (!selectedProjectId || !userProfile) return;
 
@@ -107,7 +107,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                 currentFolder?.id, // Parent folder ID (or undefined for root)
                 userProfile.id
             );
-            
+
             // Add new folder to local assets state
             setAssets(prev => ({
                 ...prev,
@@ -148,7 +148,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
-    
+
     const navigateToFolder = (folder: Asset) => {
         setFolderPath([...folderPath, folder]);
         setCurrentFolder(folder);
@@ -159,7 +159,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
         setSelectedProjectId('');
         setAssets({ script: [], character: [], moodboard: [], storyboard: [], audio: [], miscellaneous: [] });
     };
-    
+
     // Filter miscellaneous items for current view
     const getCurrentMiscItems = () => {
         return assets.miscellaneous.filter(item => {
@@ -214,11 +214,10 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                 setCurrentFolder(null); // Reset folder when switching tabs
                                 setFolderPath([]);
                             }}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                                activeTab === tab 
-                                ? 'bg-white/10 text-white shadow-sm' 
-                                : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                            }`}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === tab
+                                    ? 'bg-white/10 text-white shadow-sm'
+                                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                                }`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
@@ -228,19 +227,19 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                 {/* 1. Global Project View (No Project Selected) */}
                 {!selectedProjectId && (
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                         <div className="flex items-center gap-2 mb-6 text-zinc-400">
+                        <div className="flex items-center gap-2 mb-6 text-zinc-400">
                             <span className="font-semibold text-white">Select Project :</span>
                             <span className="text-zinc-600">to view {activeTab}</span>
-                         </div>
-                         
-                         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        </div>
+
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             {projects.map(project => (
-                                <ProjectCard 
+                                <ProjectCard
                                     key={project.id}
                                     project={project}
                                     onClick={() => handleProjectSelect(project)}
                                     // Disable other features not needed here like rename/delete if needed, or keep them
-                                    canDelete={false} 
+                                    canDelete={false}
                                     showDetails={false}
                                 />
                             ))}
@@ -249,7 +248,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                     No projects found.
                                 </div>
                             )}
-                         </div>
+                        </div>
                     </div>
                 )}
 
@@ -259,13 +258,13 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                         {/* Project Header / Back to Global (for Misc) */}
                         <div className="flex items-center justify-between mb-6">
                             <div className="flex items-center gap-4">
-                                    <button 
-                                        onClick={exitProjectView}
-                                        className="p-2 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"
-                                        title="Back to All Projects"
-                                    >
-                                        <ArrowLeft size={20} />
-                                    </button>
+                                <button
+                                    onClick={exitProjectView}
+                                    className="p-2 hover:bg-white/10 rounded-full text-zinc-400 hover:text-white transition-colors"
+                                    title="Back to All Projects"
+                                >
+                                    <ArrowLeft size={20} />
+                                </button>
                                 <div>
                                     <h4 className="text-lg font-bold text-white leading-none">
                                         {projects.find(p => p.id === selectedProjectId)?.name || 'Project'}
@@ -287,7 +286,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                         <span className="text-sm font-medium">New Folder</span>
                                     </button>
                                 )}
-                                
+
                                 {activeTab !== 'audio' && activeTab !== 'storyboard' && (
                                     <>
                                         <button
@@ -304,7 +303,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                             )}
                                             <span className="text-sm font-medium">{activeTab === 'character' ? 'Add Character' : 'Upload'}</span>
                                         </button>
-                                        
+
                                         <input
                                             type="file"
                                             multiple
@@ -342,8 +341,8 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
 
                         {/* Breadcrumbs for Miscellaneous */}
                         {activeTab === 'miscellaneous' && (
-                             <div className="flex items-center gap-2 text-sm text-zinc-400 mb-6 bg-black/20 p-2 rounded-lg border border-white/5">
-                                <button 
+                            <div className="flex items-center gap-2 text-sm text-zinc-400 mb-6 bg-black/20 p-2 rounded-lg border border-white/5">
+                                <button
                                     onClick={() => { setCurrentFolder(null); setFolderPath([]); }}
                                     className="hover:text-white hover:underline px-1"
                                 >
@@ -352,7 +351,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                 {folderPath.map((folder, index) => (
                                     <React.Fragment key={folder.id}>
                                         <span className="text-zinc-600">/</span>
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 // Navigate to this folder
                                                 const newPath = folderPath.slice(0, index + 1);
@@ -436,7 +435,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                         <div className="absolute inset-0 flex items-center justify-center">
                                                             <ImageIcon size={32} className="text-zinc-600" />
                                                         </div>
-                                                        
+
                                                         {/* Hover Overlay */}
                                                         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                                                             <span className="px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full border border-blue-500/30 font-medium text-xs tracking-wide uppercase">
@@ -555,7 +554,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                             </div>
 
                                                             <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent pointer-events-none">
-                                                                <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{char.age_group || 'Character'}</p>
+                                                                <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{char.default_age_group || 'Character'}</p>
                                                             </div>
                                                         </div>
                                                         <div className="p-4">
@@ -563,7 +562,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                             <div className="flex items-center justify-between mt-2">
                                                                 <span className="text-xs text-zinc-500 flex items-center gap-1">
                                                                     <ImageIcon size={12} />
-                                                                    {char.images?.length || 0} images
+                                                                    {Object.values(char.age_groups || {}).flat().reduce((sum, v: any) => sum + (v.images?.length || 0), 0)} images
                                                                 </span>
                                                             </div>
                                                         </div>
@@ -622,7 +621,7 @@ export const AssetLibrary: React.FC<AssetLibraryProps> = ({ projects }) => {
                                                                 onDelete={() => handleDelete(folder.id)}
                                                             />
                                                         ))}
-                                                        
+
                                                         {files.map(asset => (
                                                             <div
                                                                 key={asset.id}
