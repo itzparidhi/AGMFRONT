@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Wand2, Sparkles, Loader2, ImagePlus, X, ChevronDown, Star, User, Upload, Target, Image as ImageIcon, Plus } from 'lucide-react';
 import { DriveImage } from '../DriveImage';
 import type { Shot } from '../../types';
@@ -200,6 +200,7 @@ export const GenerationTools: React.FC<GenerationToolsProps> = ({
 
 
     const getPreviewUrl = (gdriveLink: string) => {
+        if (!gdriveLink) return '';
         const match = gdriveLink.match(/\/d\/([^\/]+)/);
         if (match) {
             return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w200`;
@@ -746,13 +747,23 @@ export const GenerationTools: React.FC<GenerationToolsProps> = ({
                                         className="group relative flex items-center gap-2 bg-zinc-800 pl-1 pr-3 py-1 rounded-full border border-zinc-700 hover:border-zinc-500 transition-colors"
                                     >
                                         <div className="w-6 h-6 rounded-full bg-zinc-700 overflow-hidden">
-                                            {getPreviewUrl(char.gdrive_link) && (
-                                                <img
-                                                    src={getPreviewUrl(char.gdrive_link)}
-                                                    alt={char.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            )}
+                                            {(() => {
+                                                const age = char.selectedAgeGroup || char.default_age_group || 'Adult';
+                                                let imgUrl = '';
+                                                if (char.age_groups && char.age_groups[age] && char.age_groups[age].length > 0) {
+                                                    const ver = char.age_groups[age][0];
+                                                    if (ver.images && ver.images.length > 0) imgUrl = ver.images[0].url;
+                                                }
+                                                if (!imgUrl && char.images && char.images.length > 0) imgUrl = char.images[0].url;
+                                                if (!imgUrl && char.gdrive_link) imgUrl = getPreviewUrl(char.gdrive_link);
+                                                return imgUrl ? (
+                                                    <img
+                                                        src={imgUrl}
+                                                        alt={char.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : null;
+                                            })()}
                                         </div>
                                         <span className="text-xs text-zinc-300 max-w-[100px] truncate">
                                             {char.name} <span className="text-zinc-500">({char.selectedAgeGroup || char.default_age_group || 'Adult'})</span>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import type { Character, Asset, CharacterVersion } from '../types';
+import type { Character, CharacterVersion } from '../types';
 import { saveCharacterImages, deleteCharacter } from '../api';
 import { useDialog } from '../context/DialogContext';
 import { useAuth } from '../context/AuthContext';

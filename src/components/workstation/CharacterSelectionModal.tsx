@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getCharacters } from '../../api';
 import type { Character } from '../../types';
-import { X, Check, ChevronDown } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 
 interface CharacterSelectionModalProps {
     projectId: string;
@@ -14,7 +14,7 @@ export const CharacterSelectionModal: React.FC<CharacterSelectionModalProps> = (
     projectId,
     onSelect,
     onClose,
-    selectedCharacterIds,
+
 }) => {
     const [characters, setCharacters] = useState<Character[]>([]);
     // Track selected characters and their chosen age group

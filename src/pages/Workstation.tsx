@@ -680,8 +680,33 @@ export const Workstation: React.FC = () => {
         }
         // (B) From Selected Characters (New/Resources)
         for (const char of selectedCharacters) {
-          if (char.gdrive_link) {
-            autoCharactersUrls.push(char.gdrive_link);
+          // Extract image URL from character's age_groups or legacy images
+          const ageGroup = char.selectedAgeGroup || char.default_age_group || 'Adult';
+          let charImageUrl = '';
+          console.log('DEBUG char object:', char.name, 'ageGroup:', ageGroup, 'age_groups:', JSON.stringify(char.age_groups), 'images:', char.images, 'gdrive_link:', char.gdrive_link, 'url:', char.url);
+
+          // Try age_groups first (new structure)
+          if (char.age_groups && char.age_groups[ageGroup] && char.age_groups[ageGroup].length > 0) {
+            const latestVer = char.age_groups[ageGroup][0];
+            if (latestVer.images && latestVer.images.length > 0) {
+              charImageUrl = latestVer.images[0].url;
+            }
+          }
+
+          // Fallback to legacy flat images
+          if (!charImageUrl && char.images && char.images.length > 0) {
+            charImageUrl = char.images[0].url;
+          }
+
+          // Last fallback: gdrive_link if it exists
+          if (!charImageUrl && char.gdrive_link) {
+            charImageUrl = char.gdrive_link;
+          }
+
+          if (charImageUrl) {
+            autoCharactersUrls.push(charImageUrl);
+          } else {
+            console.warn(`No image URL found for character: ${char.name}`);
           }
         }
       } else if (generationMode === 'storyboard_enhancer') {
