@@ -39,7 +39,7 @@ export const AssignmentsPanel: React.FC = () => {
       setUserProfile(profile);
 
       if (profile?.role === 'CD') {
-        const { data: allProjects } = await supabase.from('projects').select('*');
+        const { data: allProjects } = await supabase.from('projects').select('*').or('is_deleted.is.null,is_deleted.eq.false');
         setProjects(allProjects || []);
 
         const { data: allPMs } = await supabase.from('users').select('*').eq('role', 'PM');
@@ -49,7 +49,7 @@ export const AssignmentsPanel: React.FC = () => {
       if (profile?.role === 'PM' || profile?.role === 'CD') {
         // PM sees assigned projects (CD sees all via above logic, but let's ensure consistency)
         if (profile.role === 'PM') {
-          const { data: assignedProjects } = await supabase.from('projects').select('*').eq('assigned_pm_id', user.id);
+          const { data: assignedProjects } = await supabase.from('projects').select('*').eq('assigned_pm_id', user.id).or('is_deleted.is.null,is_deleted.eq.false');
           setProjects(assignedProjects || []);
         }
 
@@ -107,66 +107,66 @@ export const AssignmentsPanel: React.FC = () => {
 
   const executeBulkAssign = async () => {
     try {
-        const { error } = await supabase
-          .from('shots')
-          .update({ assigned_pe_id: targetPeId })
-          .in('id', selectedShotIds);
+      const { error } = await supabase
+        .from('shots')
+        .update({ assigned_pe_id: targetPeId })
+        .in('id', selectedShotIds);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        dialog.alert('Success', 'Assignments updated successfully!', 'success');
-        setSelectedShotIds([]);
-        if (selectedProject) fetchProjectDetails(selectedProject);
+      dialog.alert('Success', 'Assignments updated successfully!', 'success');
+      setSelectedShotIds([]);
+      if (selectedProject) fetchProjectDetails(selectedProject);
     } catch (err) {
-        console.error(err);
-        dialog.alert('Error', 'Assignment failed. Please try again.', 'danger');
+      console.error(err);
+      dialog.alert('Error', 'Assignment failed. Please try again.', 'danger');
     }
   };
 
   const handleBulkAssign = async () => {
     if (!targetPeId || selectedShotIds.length === 0) return;
-    
+
     const peName = pes.find(p => p.id === targetPeId)?.email || 'the selected engineer';
-    
+
     dialog.confirm(
-        'Confirm Assignment', 
-        `Are you sure you want to assign ${selectedShotIds.length} shots to ${peName}?`, 
-        executeBulkAssign,
-        'info'
+      'Confirm Assignment',
+      `Are you sure you want to assign ${selectedShotIds.length} shots to ${peName}?`,
+      executeBulkAssign,
+      'info'
     );
   };
 
   const executeUnassign = async (shotId: string) => {
-      try {
-        const { error } = await supabase
-            .from('shots')
-            .update({ assigned_pe_id: null })
-            .eq('id', shotId);
+    try {
+      const { error } = await supabase
+        .from('shots')
+        .update({ assigned_pe_id: null })
+        .eq('id', shotId);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        dialog.alert('Success', 'Shot unassigned successfully.', 'success');
-        if (selectedProject) fetchProjectDetails(selectedProject); 
-      } catch (err) {
-        console.error(err);
-        dialog.alert('Error', 'Unassignment failed.', 'danger');
-      }
+      dialog.alert('Success', 'Shot unassigned successfully.', 'success');
+      if (selectedProject) fetchProjectDetails(selectedProject);
+    } catch (err) {
+      console.error(err);
+      dialog.alert('Error', 'Unassignment failed.', 'danger');
+    }
   };
 
   const handleUnassign = async (shotId: string) => {
-      dialog.confirm(
-          'Unassign Shot',
-          'Are you sure you want to unassign this shot? The engineer will lose access.',
-          () => executeUnassign(shotId),
-          'danger'
-      );
+    dialog.confirm(
+      'Unassign Shot',
+      'Are you sure you want to unassign this shot? The engineer will lose access.',
+      () => executeUnassign(shotId),
+      'danger'
+    );
   };
 
   if (loading) return <div className="text-white p-8">Loading assignments...</div>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      
+
       {/* CD Only: Assign PMs */}
       {userProfile?.role === 'CD' && (
         <div className="glass-panel p-6">
@@ -234,8 +234,8 @@ export const AssignmentsPanel: React.FC = () => {
                             <div
                               onClick={() => toggleShot(shot.id)}
                               className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 min-w-max ${selectedShotIds.includes(shot.id)
-                                  ? 'bg-white/10 border border-white/20 shadow-inner'
-                                  : 'hover:bg-white/5 border border-transparent'
+                                ? 'bg-white/10 border border-white/20 shadow-inner'
+                                : 'hover:bg-white/5 border border-transparent'
                                 }`}
                             >
                               {selectedShotIds.includes(shot.id) ? (
