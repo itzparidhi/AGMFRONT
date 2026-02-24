@@ -114,9 +114,11 @@ export interface Review {
   pm_vote: boolean | null;
   pm_comment: string | null;
   pm_voted_at: string | null;
+  pm_voter_email: string | null;
   cd_vote: boolean | null;
   cd_comment: string | null;
   cd_voted_at: string | null;
+  cd_voter_email: string | null;
   pm_image_url?: string | null;
   pm_annotation_url?: string | null;
   cd_image_url?: string | null;

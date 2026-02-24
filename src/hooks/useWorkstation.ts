@@ -168,10 +168,10 @@ export const useWorkstation = () => {
   };
 
   const handleVote = async (type: 'pm' | 'cd', vote: boolean) => {
-    if (!review || !activeVersion || !shot) return;
+    if (!review || !activeVersion || !shot || !userProfile) return;
     const update = type === 'pm'
-      ? { pm_vote: vote, pm_voted_at: new Date().toISOString() }
-      : { cd_vote: vote, cd_voted_at: new Date().toISOString() };
+      ? { pm_vote: vote, pm_voted_at: new Date().toISOString(), pm_voter_email: userProfile.email }
+      : { cd_vote: vote, cd_voted_at: new Date().toISOString(), cd_voter_email: userProfile.email };
 
     await supabase.from('reviews').update(update).eq('id', review.id);
 
@@ -242,8 +242,8 @@ export const useWorkstation = () => {
     }
 
     const update: any = type === 'pm'
-      ? { pm_comment: comment }
-      : { cd_comment: comment };
+      ? { pm_comment: comment, pm_voter_email: userProfile.email }
+      : { cd_comment: comment, cd_voter_email: userProfile.email };
 
     if (imageUrls.length > 0) {
       if (type === 'pm') {

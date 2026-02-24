@@ -243,9 +243,9 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                             <span className={review.pm_vote ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
                                                 {review.pm_vote ? 'Approved' : 'Rejected'} by PM
                                             </span>
-                                            {activeVersion?.users?.email && (
-                                                <span className="text-zinc-500 font-mono text-[10px] truncate max-w-[100px]" title={activeVersion.users.email}>
-                                                    {activeVersion.users.email.split('@')[0]}
+                                            {review.pm_voter_email && (
+                                                <span className="text-zinc-500 font-mono text-[10px] truncate max-w-[120px]" title={review.pm_voter_email}>
+                                                    {review.pm_voter_email.split('@')[0]}
                                                 </span>
                                             )}
                                         </div>
@@ -526,9 +526,9 @@ export const FeedbackPanel: React.FC<FeedbackPanelProps> = ({
                                             <span className={review.cd_vote ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
                                                 {review.cd_vote ? 'Approved' : 'Rejected'} by CD
                                             </span>
-                                            {activeVersion?.users?.email && (
-                                                <span className="text-zinc-500 font-mono text-[10px] truncate max-w-[100px]" title={activeVersion.users.email}>
-                                                    {activeVersion.users.email.split('@')[0]}
+                                            {review.cd_voter_email && (
+                                                <span className="text-zinc-500 font-mono text-[10px] truncate max-w-[120px]" title={review.cd_voter_email}>
+                                                    {review.cd_voter_email.split('@')[0]}
                                                 </span>
                                             )}
                                         </div>
