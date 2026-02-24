@@ -43,7 +43,7 @@ export const NotificationBell: React.FC = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 glass-panel z-50 max-h-96 overflow-y-auto rounded-2xl">
+        <div className="absolute right-0 mt-2 w-80 notification-panel-solid z-50 max-h-96 overflow-y-auto rounded-2xl">
           <div className="p-3 border-b border-white/10 font-bold text-sm text-white font-subheading tracking-wider bg-white/5 backdrop-blur-md">
             Notifications
           </div>

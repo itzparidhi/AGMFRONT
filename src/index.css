@@ -143,6 +143,13 @@ textarea {
   transition: all 0.3s ease-out;
 }
 
+.notification-panel-solid {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow), 0 0 20px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
 .glass-panel:hover {
   border-color: var(--glass-border-highlight);
   box-shadow: var(--glass-shadow), var(--glass-glow);
